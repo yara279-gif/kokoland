@@ -11,7 +11,6 @@ services:
   build_command: |
     pip install -r requirements.txt
     python manage.py collectstatic --noinput
-    python manage.py migrate
   
   # Run command - starts your app
   run_command: gunicorn kokoland.wsgi:application --bind 0.0.0.0:8080
@@ -19,7 +18,7 @@ services:
   # Environment
   environment_slug: python
   
-  # Instance specs (cheapest option)
+  # Instance specs
   instance_count: 1
   instance_size_slug: basic-xxs
   
@@ -28,11 +27,5 @@ services:
   routes:
   - path: /
   
-  # Environment variables (or set in DigitalOcean dashboard)
-  envs:
-  - key: DEBUG
-    value: "False"
-  - key: DJANGO_SETTINGS_MODULE
-    value: "kokoland.settings"
-  - key: PYTHONPATH
-    value: "/app"
+  # Environment variables - SET THESE IN DIGITALOCEAN DASHBOARD INSTEAD
+  # Remove the envs section below and set them in the UI
