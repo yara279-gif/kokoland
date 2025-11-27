@@ -31,7 +31,7 @@ urlpatterns = [
     path("addadmin/", addadmin.as_view()),
     path("adduser/", adduser.as_view()),
     path("retrieveuser/<int:id>/", retrieveeuser.as_view()),
-    path("searchuser/<str:username>/", searchuser.as_view()),
+    path("searchuser/<str:first_name>/", searchuser.as_view()),
     path("deleteuser/<int:id>/", deleteuser.as_view()),
     path("updateuser/<int:id>/", updateuser.as_view()),
     path("deleteaccount/", delete_account, name="deleteaccount"),

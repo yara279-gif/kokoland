@@ -33,6 +33,7 @@ class userRegisterSerializer(serializers.ModelSerializer):
             "payment_info",
             "password",
             "password2",
+
         ]
         extra_kwargs = {"password": {"write_only": True}}
 
@@ -44,6 +45,7 @@ class userRegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop("password2")
         return User.objects.create_user(**validated_data)
+        
 
 
 # ---------------------------------(login)-------------------------------------
@@ -80,7 +82,7 @@ class userProfileSerializer(serializers.ModelSerializer):
 class updateuserprofileserializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["email", "username", "first_name", "last_name", "image", "address", "payment_info"]
+        fields = ["email",  "first_name", "last_name", "image", "address", "payment_info"]
 
 
 # ---------------------------------(change-password)-------------------------------------
@@ -206,7 +208,7 @@ class ResetPasswordEmailSerializer(serializers.ModelSerializer):
 
         # Render email template
         body = render_to_string(
-            "account/email.html", {"reset_link": link, "user": user}
+            "user/resetemail.html", {"reset_link": link, "user": user}
         )
 
         # Send the email
@@ -330,6 +332,6 @@ class UserSerializer(serializers.ModelSerializer):
 class ListSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "username", "first_name", "last_name", "image", "is_admin"]
+        fields = ["id", "email", "first_name", "last_name", "image", "is_admin"]
 
 

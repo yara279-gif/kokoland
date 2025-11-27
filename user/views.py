@@ -118,7 +118,7 @@ def userprofile(request):
 # ----------------------(change_password_view)-------------------------------------------------
 
 
-@api_view(["POST"])
+@api_view(["PATCH"])
 def change_password(request):
     serializer = serializers.ChangePasswordSerializer(
         data=request.data, context={"request": request}
@@ -205,12 +205,12 @@ class retrieveeuser(APIView):
 class searchuser(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, email):
+    def get(self, request, first_name):
         serializerr = userProfileSerializer(request.user)
         if serializerr.data["is_admin"] == False:
             return Response({"message": "Don't have access"})
 
-        user = User.objects.filter(email=email)
+        user = User.objects.filter(first_name=first_name)
         if user.exists():
             serializer = UserSerializer(user, many=True, context={"request": request})
             return Response(serializer.data)
@@ -222,7 +222,7 @@ class searchuser(APIView):
 class deleteuser(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, id):
+    def delete(self, request, id):
         serializerr = userProfileSerializer(request.user)
         if serializerr.data["is_admin"] == False:
             return Response({"message": "Don't have access"})
@@ -301,7 +301,7 @@ def delete_account(request):
 
 # ------------------------------------------------------------------------------------------
 # -------------------------------(user_update_profile)-------------------------------------------
-@api_view(["GET", "PUT"])
+@api_view(["GET", "PUT", "PATCH"])
 def update_profile(request):
     permission_classes = [IsAuthenticated]
     if request.method == "GET":
@@ -344,6 +344,16 @@ def update_profile(request):
                 )
             return Response({"msg": ls}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == "PATCH" :
+        serializer = serializers.updateuserprofileserializer(
+            request.user, data=request.data, partial=True, context={"request": request}
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"msg": "Profile updated successfully"}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
 
 
 

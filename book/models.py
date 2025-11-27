@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from user.models import User
 
+
 # Create your models here.
 
 class Book(models.Model):
@@ -10,11 +11,11 @@ class Book(models.Model):
     price = models.DecimalField(max_digits=6, decimal_places=2)
     category = models.CharField(max_length=100)
     age= models.CharField(max_length=50)
-    cover_image = models.ImageField(upload_to='media/covers/')
+    cover_image = models.ImageField(upload_to='media/covers/', null=True, blank=True)
     gender = models.CharField(max_length=50)
     rate = models.FloatField()
     description = models.TextField()
-    published_date = models.DateField(default=timezone.now)
+    published_date = models.DateTimeField(default=timezone.now)
     book_file = models.FileField(upload_to='media/books/')
 
     def __str__(self):

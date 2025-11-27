@@ -9,6 +9,12 @@ from rest_framework.response import Response
 from rest_framework import status
 from PIL import Image
 from .models import Book, Customizations
+from rest_framework import generics
+from .serializers import BookSerializer, CustomizationSerializer
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+
 
 
 class CustomizeBook(APIView):
@@ -465,3 +471,140 @@ class CustomizeBook(APIView):
         doc.close()
         print(f"PDF with replaced images saved to {output_pdf_path}")
     
+
+#=========================================add book=================================================
+
+
+
+
+@api_view(["POST"])
+def addbook(request):
+    if request.method == "POST":
+        
+        permission_classes = [IsAuthenticated]
+        request.data["avilable"] = True
+        serializer = BookSerializer(data=request.data, context={"request": request})
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(
+                {"msg": "Book added successfull", "data": serializer.data},
+                status=status.HTTP_201_CREATED,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ++++++++++++++++++++++++++++++++++++(retrive_all_books)+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+@api_view(["GET"])
+def list_books(request):
+    if request.method == "GET":
+        permission_classes = [IsAuthenticated]
+        books = Book.objects.all()
+
+        serializer = BookSerializer(books, many=True, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response({"msg": "not allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+# # ++++++++++++++++++++++++++++++++++++(retrive_one_book)+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+@api_view(["GET"])
+def retrieve_one_book(request, pk):
+    if request.method == "GET":
+        permission_classes = [IsAuthenticated]
+        try:
+            book = Book.objects.get(pk=pk)
+            serializer = BookSerializer(book, context={"request": request})
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Book.DoesNotExist:
+            return Response({"msg": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    return Response({"msg": "not allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+# # ++++++++++++++++++++++++++++++++++++(update_book)+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+@api_view(["PATCH"])
+def update_book(request, pk):
+    if request.method == "PATCH":
+        permission_classes = [IsAuthenticated]
+        try:
+            book = Book.objects.get(pk=pk)
+            serializer = BookSerializer(
+                book, data=request.data, partial=True, context={"request": request}
+            )
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+                return Response(
+                    {"msg": "Book updated successfully", "data": serializer.data},
+                    status=status.HTTP_200_OK,
+                )
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Book.DoesNotExist:
+            return Response({"msg": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+    return Response({"msg": "not allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+# # ++++++++++++++++++++++++++++++++++++(delete_book)+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+@api_view(["DELETE"])
+def delete_book(request, pk):
+    if request.method == "DELETE":
+        try:
+            book = Book.objects.get(pk=pk)
+            book.delete()
+            return Response(
+                {"msg": "deleted successfully"}, status=status.HTTP_204_NO_CONTENT
+            )
+        except Book.DoesNotExist:
+            return Response(
+                {"error": "Book not found"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+# # ++++++++++++++++++++++++++++++++++++(search_about_book)+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+@api_view(["POST"])
+def search_about_book(request, title=None, category=None, age=None, gender=None):
+    if request.method == "POST":
+        permission_classes = [IsAuthenticated]
+        title = request.data.get("title")
+        category = request.data.get("category")
+        age = request.data.get("age")
+        gender = request.data.get("gender")
+
+        if title is None and category is None and age is None and gender is None:
+            return Response(
+                {"msg": "At least one search parameter is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            if title:
+                book = Book.objects.filter(title__icontains=title)
+            elif category:
+                book = Book.objects.filter(category__icontains=category)
+            elif age:
+                book = Book.objects.filter(age__icontains=age)
+            elif gender:
+                book = Book.objects.filter(gender__icontains=gender)
+            serializer = BookSerializer(
+                book, many=True, context={"request": request}
+            )
+            if serializer.data:
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(
+                    {"msg": "No books found"}, status=status.HTTP_404_NOT_FOUND
+                )
+        except Book.DoesNotExist as e:
+            return Response(
+                {"error": f"Book not found {e}"}, status=status.HTTP_404_NOT_FOUND
+            )
+    return Response({"msg": "not allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+
+
+

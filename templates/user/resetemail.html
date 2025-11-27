@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>reset_link</title>
+</head>
+<body>
+    <p>Hi {{ user.first_name }},</p>
+    <p>You requested a password reset. Click the link below to reset your password:</p>
+    <p><a href="{{ reset_link }}">{{ reset_link }}</a></p>
+    <p>If you did not request this, please ignore this email.</p>
+    <p>Best regards,<br>Your Website Team</p>
+</body>
+</html>
