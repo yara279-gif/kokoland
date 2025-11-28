@@ -1,230 +1,388 @@
+"""
+Django settings for kokoland project.
+Optimized for both local development and DigitalOcean App Platform.
+"""
+
 import os
 from pathlib import Path
-from dotenv import load_dotenv
-from django.conf import settings
 from datetime import timedelta
-from rest_framework.permissions import (
-    IsAuthenticatedOrReadOnly,
-    AllowAny,
-    IsAdminUser,
-    DjangoModelPermissions,
-    DjangoModelPermissionsOrAnonReadOnly,
-)
+from dotenv import load_dotenv
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load the correct .env file based on environment
-ENVIRONMENT = os.environ.get("ENVIRONMENT", "development").lower()
-
-if ENVIRONMENT == "production":
-    env_file = os.path.join(BASE_DIR, ".env")
-else:
-    env_file = os.path.join(BASE_DIR, ".env.local")
+# =====================
+# ENVIRONMENT DETECTION & CONFIGURATION
+# =====================
 
 # Load environment variables
-load_dotenv(env_file)
+ENVIRONMENT = os.environ.get('DJANGO_ENV', 'development').lower()
+
+if ENVIRONMENT == 'development':
+    # Load .env.local for development
+    env_file = BASE_DIR / '.env.local'
+    if env_file.exists():
+        load_dotenv(env_file)
+        print("✅ Loaded .env.local for development")
+    else:
+        print("⚠️  .env.local not found, using environment variables")
+else:
+    print("✅ Production environment - using DigitalOcean environment variables")
+
+# Detect if running on DigitalOcean
+IS_DIGITALOCEAN = os.environ.get('DIGITALOCEAN_APP_ID') is not None
+IS_PRODUCTION = ENVIRONMENT == 'production' or IS_DIGITALOCEAN
+IS_LOCAL = not IS_PRODUCTION
+
+print(f"🚀 Environment: {'PRODUCTION' if IS_PRODUCTION else 'LOCAL DEVELOPMENT'}")
+
+# =====================
+# SECURITY SETTINGS
+# =====================
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("SECRET_KEY")
+SECRET_KEY = os.environ.get('SECRET_KEY')
+
 if not SECRET_KEY:
-    raise ValueError("SECRET_KEY environment variable is required")
+    if IS_PRODUCTION:
+        raise ValueError("❌ SECRET_KEY environment variable is required in production!")
+    else:
+        SECRET_KEY = 'django-insecure-dev-key-only-for-local-development'
+        print("⚠️  Using development SECRET_KEY - change this in production!")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
+DEBUG = os.environ.get('DEBUG', 'True' if IS_LOCAL else 'False').lower() == 'true'
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
-if ALLOWED_HOSTS == ['']:
-    ALLOWED_HOSTS = []
+# Hosts configuration
+if IS_PRODUCTION:
+    ALLOWED_HOSTS = [
+        '.ondigitalocean.app',
+        'localhost',
+        '127.0.0.1',
+    ]
+    # Add custom domain if provided
+    custom_domain = os.environ.get('CUSTOM_DOMAIN')
+    if custom_domain:
+        ALLOWED_HOSTS.append(custom_domain)
+else:
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '192.168.1.*']
 
-# Application definition
-REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-    )
-}
+# Security settings for production
+if IS_PRODUCTION:
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+else:
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+
+# CSRF trusted origins
+CSRF_TRUSTED_ORIGINS = []
+if IS_PRODUCTION:
+    CSRF_TRUSTED_ORIGINS = [
+        'https://*.ondigitalocean.app',
+    ]
+    custom_domain = os.environ.get('CUSTOM_DOMAIN')
+    if custom_domain:
+        CSRF_TRUSTED_ORIGINS.append(f'https://{custom_domain}')
+else:
+    CSRF_TRUSTED_ORIGINS = [
+        'http://localhost:8000',
+        'http://127.0.0.1:8000',
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
+    ]
+
+# =====================
+# DATABASE CONFIGURATION
+# =====================
+
+if IS_PRODUCTION:
+    # DigitalOcean provides DATABASE_URL automatically when you add a database
+    DATABASE_URL = os.environ.get('DATABASE_URL')
+    if DATABASE_URL:
+        DATABASES = {
+            'default': dj_database_url.config(
+                default=DATABASE_URL,
+                conn_max_age=600,
+                conn_health_checks=True,
+                ssl_require=True
+            )
+        }
+        print("✅ Using DigitalOcean PostgreSQL database")
+    else:
+        # Fallback to SQLite if no database is configured
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
+        print("⚠️  No DATABASE_URL found, using SQLite (add a database in app.yaml)")
+else:
+    # Local development database
+    LOCAL_DB_ENGINE = os.environ.get('LOCAL_DB_ENGINE', 'sqlite')
+    
+    if LOCAL_DB_ENGINE == 'postgresql':
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': os.environ.get('LOCAL_DB_NAME', 'kokoland'),
+                'USER': os.environ.get('LOCAL_DB_USER', 'postgres'),
+                'PASSWORD': os.environ.get('LOCAL_DB_PASSWORD', '123'),
+                'HOST': os.environ.get('LOCAL_DB_HOST', 'localhost'),
+                'PORT': os.environ.get('LOCAL_DB_PORT', '5432'),
+            }
+        }
+        print("✅ Using local PostgreSQL database")
+    else:
+        # Default to SQLite for local development
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
+        print("✅ Using local SQLite database")
+
+# =====================
+# APPLICATION DEFINITION
+# =====================
 
 INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-    "book",
-    "user",
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    
+    # Third-party apps
     'corsheaders',
-    "rest_framework",
-    "rest_framework_simplejwt.token_blacklist",
-    "rest_framework_simplejwt",
-
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
+    
+    # Local apps
+    'book',
+    'user',
 ]
 
 MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
-    "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'corsheaders.middleware.CorsMiddleware',  # First
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:8000",
-]
-CORS_ALLOW_METHODS = (
-    "DELETE",
-    "GET",
-    "OPTIONS",
-    "PATCH",
-    "POST",
-    "PUT",
-)
-
-CORS_ALLOW_ALL_ORIGINS = True
-
-
-ROOT_URLCONF = "kokoland.urls"
+ROOT_URLCONF = 'kokoland.urls'
 
 TEMPLATES = [
     {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, "templates")],
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR / 'templates'],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = "kokoland.wsgi.application"
+WSGI_APPLICATION = 'kokoland.wsgi.application'
 
-# Database
-DB_ENGINE = os.environ.get("DB_ENGINE", "django.db.backends.sqlite3")
+# =====================
+# PASSWORD VALIDATION
+# =====================
 
-if DB_ENGINE == "django.db.backends.sqlite3":
-    DATABASES = {
-        "default": {
-            "ENGINE": DB_ENGINE,
-            "NAME": BASE_DIR / os.environ.get("DB_NAME", "db.sqlite3"),
-        }
-    }
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": DB_ENGINE,
-            "NAME": os.environ.get("DB_NAME"),
-            "USER": os.environ.get("DB_USER"),
-            "PASSWORD": os.environ.get("DB_PASSWORD"),
-            "HOST": os.environ.get("DB_HOST", "localhost"),
-            "PORT": os.environ.get("DB_PORT", "5432"),
-        }
-    }
-
-# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
     {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
     },
     {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
 
-# Internationalization
-LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
+# =====================
+# INTERNATIONALIZATION
+# =====================
+
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-STATIC_URL = os.environ.get('STATIC_URL', 'static/')
-# STATIC_ROOT = os.path.join(BASE_DIR, "static")
+# =====================
+# STATIC & MEDIA FILES
+# =====================
 
-# Directory where collected static files will be placed for deployment
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # WhiteNoise configuration for production
-if ENVIRONMENT == 'production':
+if IS_PRODUCTION:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+else:
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
+# =====================
+# REST FRAMEWORK & JWT
+# =====================
 
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-MEDIA_URL = os.environ.get('MEDIA_URL', "/media/")
-
-
-# Default primary key field type
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-# CSRF Trusted Origins
-CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
-if CSRF_TRUSTED_ORIGINS == ['']:
-    CSRF_TRUSTED_ORIGINS = []
-
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ] if not DEBUG else [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
+}
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=5),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=15),
-    "ROTATE_REFRESH_TOKENS": False,
-    "BLACKLIST_AFTER_ROTATION": True,
-    "UPDATE_LAST_LOGIN": False,
-    "ALGORITHM": "HS256",
-    "SIGNING_KEY": settings.SECRET_KEY,
-    "VERIFYING_KEY": "",
-    "AUDIENCE": None,
-    "ISSUER": None,
-    "JSON_ENCODER": None,
-    "JWK_URL": None,
-    "LEEWAY": 0,
-    "AUTH_HEADER_TYPES": ("Bearer",),
-    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
-    "USER_ID_FIELD": "id",
-    "USER_ID_CLAIM": "user_id",
-    "USER_AUTHENTICATION_RULE": "rest_framework_simplejwt.authentication.default_user_authentication_rule",
-    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
-    "TOKEN_TYPE_CLAIM": "token_type",
-    "TOKEN_USER_CLASS": "rest_framework_simplejwt.models.TokenUser",
-    "JTI_CLAIM": "jti",
-    "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
-    "SLIDING_TOKEN_LIFETIME": timedelta(days=5),
-    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=15),
-    "TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainPairSerializer",
-    "TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSerializer",
-    "TOKEN_VERIFY_SERIALIZER": "rest_framework_simplejwt.serializers.TokenVerifySerializer",
-    "TOKEN_BLACKLIST_SERIALIZER": "rest_framework_simplejwt.serializers.TokenBlacklistSerializer",
-    "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
-    "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=5),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=15),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
 }
-PASSWORD_RESET_TIMEOUT = 900  # 900 sec = 15 min
 
-# email configuration
+# =====================
+# CORS SETTINGS
+# =====================
 
+if IS_LOCAL:
+    # Local development: Allow all origins
+    CORS_ALLOW_ALL_ORIGINS = True
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+    ]
+    print("✅ CORS: All origins allowed for local development")
+else:
+    # Production: Specific origins only
+    CORS_ALLOW_ALL_ORIGINS = False
+    CORS_ALLOWED_ORIGINS = []
+    provided_cors = os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',')
+    CORS_ALLOWED_ORIGINS = [origin.strip() for origin in provided_cors if origin.strip()]
+    print(f"✅ CORS: Restricted to {CORS_ALLOWED_ORIGINS or 'no origins'}")
 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 587
-EMAIL_HOST_USER = "yaraharby9@gmail.com"
-EMAIL_HOST_PASSWORD = "hvoh sebi hsbk mnnl"
-EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+CORS_ALLOW_CREDENTIALS = True
 
+CORS_ALLOW_METHODS = [
+    'DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT',
+]
 
-AUTH_USER_MODEL = "user.User"
+CORS_ALLOW_HEADERS = [
+    'accept', 'accept-encoding', 'authorization', 'content-type',
+    'dnt', 'origin', 'user-agent', 'x-csrftoken', 'x-requested-with',
+]
+
+# =====================
+# EMAIL CONFIGURATION
+# =====================
+
+if IS_LOCAL:
+    # Local: Console backend
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    print("✅ Email: Using console backend for local development")
+else:
+    # Production: SMTP backend
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+    EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+    EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() == 'true'
+    DEFAULT_FROM_EMAIL = EMAIL_HOST_USER or 'noreply@kokoland.com'
+    print("✅ Email: Using SMTP backend for production")
+
+PASSWORD_RESET_TIMEOUT = 900  # 15 minutes
+AUTH_USER_MODEL = 'user.User'
+
+# =====================
+# LOGGING CONFIGURATION
+# =====================
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple' if DEBUG else 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG' if DEBUG else 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'level': 'DEBUG' if DEBUG else 'INFO',
+        },
+    },
+}
+
+# =====================
+# FINAL CONFIGURATION CHECK
+# =====================
+
+print(f"🔧 Configuration Summary:")
+print(f"   Environment: {'PRODUCTION' if IS_PRODUCTION else 'DEVELOPMENT'}")
+print(f"   Debug: {DEBUG}")
+print(f"   Database: {DATABASES['default']['ENGINE']}")
+print(f"   Allowed Hosts: {ALLOWED_HOSTS}")
+print("🎉 Settings loaded successfully!")

@@ -7,25 +7,24 @@ services:
     repo: yara279-gif/kokoland
     branch: main
   
-  # Build command - runs during deployment
   build_command: |
     pip install -r requirements.txt
     python manage.py collectstatic --noinput
+    python manage.py migrate --noinput
   
-  # Run command - starts your app
   run_command: gunicorn kokoland.wsgi:application --bind 0.0.0.0:8080
   
-  # Environment
   environment_slug: python
-  
-  # Instance specs
   instance_count: 1
   instance_size_slug: basic-xxs
-  
-  # HTTP routes
   http_port: 8080
   routes:
   - path: /
-  
-  # Environment variables - SET THESE IN DIGITALOCEAN DASHBOARD INSTEAD
-  # Remove the envs section below and set them in the UI
+
+# Add a managed PostgreSQL database
+# databases:
+# - engine: PG
+#   name: kokoland-db
+#   version: "15"
+#   size: db-s-1vcpu-1gb
+#   num_nodes: 1

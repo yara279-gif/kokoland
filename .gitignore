@@ -1,0 +1,6 @@
+.env.local
+*.local.py
+__pycache__/
+*.sqlite3
+staticfiles/
+media/
