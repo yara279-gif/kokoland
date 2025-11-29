@@ -24,6 +24,7 @@ def home(request):
     return JsonResponse({"message": "Kokoland API is working!"})
 
 urlpatterns = [
+    path("", home),
     path("admin/", admin.site.urls),
     path("books/", include("book.urls")),
     path("user/", include("user.urls")),
