@@ -83,7 +83,10 @@ else:
     CSRF_COOKIE_SECURE = False
 
 # CSRF trusted origins
-CSRF_TRUSTED_ORIGINS = []
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.onrender.com',
+    'https://kokoland.onrender.com',
+]
 if IS_PRODUCTION:
     CSRF_TRUSTED_ORIGINS = [
         'https://*.onrender.com',
