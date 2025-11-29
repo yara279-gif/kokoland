@@ -40,6 +40,9 @@ class userRegisterSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if attrs["password"] != attrs["password2"]:
             raise serializers.ValidationError({"password2": "password dont match"})
+        if attrs["is_admin"] == True:
+            User.is_admin = True
+            
         return super().validate(attrs)
 
     def create(self, validated_data):
@@ -335,3 +338,19 @@ class ListSerializer(serializers.ModelSerializer):
         fields = ["id", "email", "first_name", "last_name", "image", "is_admin"]
 
 
+class AdminCreateSerializer(serializers.ModelSerializer):
+    password2 = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ["email", "first_name", "last_name", "image", "password", "password2"]
+
+    def validate(self, attrs):
+        if attrs["password"] != attrs["password2"]:
+            raise serializers.ValidationError("Passwords do not match")
+        return attrs
+
+    def create(self, validated_data):
+        validated_data.pop("password2")
+        user = User.objects.create_superuser(**validated_data)
+        return user

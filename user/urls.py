@@ -20,6 +20,7 @@ from .views import (
     register,
     update_profile,
     # sendResetPasswordPage,
+    CreateAdminView,
 )
 
 urlpatterns = [
@@ -42,4 +43,5 @@ urlpatterns = [
     path("sendrestpasswordemail/", reset_password_email, name="resetpasswordemail"),
     # path("resetpasswordPage/<uid>/<token>/", sendResetPasswordPage, name="resetpassword"),
     path("resetpassword/<uid>/<token>/", reset_password, name="resetpassword"),
+    path("createadmin/", CreateAdminView.as_view())
 ]
