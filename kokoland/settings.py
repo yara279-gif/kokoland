@@ -292,6 +292,7 @@ if IS_LOCAL:
     # Local development: Allow all origins
     CORS_ALLOW_ALL_ORIGINS = True
     CORS_ALLOWED_ORIGINS = [
+        "https://kokoland.onrender.com",
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "http://localhost:8000",
