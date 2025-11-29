@@ -58,7 +58,7 @@ DEBUG = os.environ.get('DEBUG', 'True' if IS_LOCAL else 'False').lower() == 'tru
 if IS_PRODUCTION:
     ALLOWED_HOSTS = [
         '.onrender.com',
-        '.ondigitalocean.app',
+        # '.ondigitalocean.app',
         'localhost',
         '127.0.0.1',
     ]
@@ -87,7 +87,7 @@ CSRF_TRUSTED_ORIGINS = []
 if IS_PRODUCTION:
     CSRF_TRUSTED_ORIGINS = [
         'https://*.onrender.com',
-        'https://*.ondigitalocean.app',
+        # 'https://*.ondigitalocean.app',
     ]
     custom_domain = os.environ.get('CUSTOM_DOMAIN')
     if custom_domain:
@@ -125,7 +125,7 @@ if IS_PRODUCTION:
                 'NAME': BASE_DIR / 'db.sqlite3',
             }
         }
-        print("⚠️  No DATABASE_URL found, using SQLite (add a database in app.yaml)")
+        print("⚠️  No DATABASE_URL found, using SQLite (add a database in render.yaml)")
 else:
     # Local development database
     LOCAL_DB_ENGINE = os.environ.get('LOCAL_DB_ENGINE', 'sqlite')
