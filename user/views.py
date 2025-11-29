@@ -3,8 +3,8 @@ from http import server
 from urllib import request
 from django.shortcuts import render
 from rest_framework import status, generics
-from rest_framework.decorators import api_view
-
+from rest_framework.decorators import api_view , permission_classes
+from rest_framework.permissions import AllowAny
 from .utils import Util
 from . import serializers
 from rest_framework.response import Response
@@ -45,6 +45,7 @@ def get_tokens_for_user(user):
 
 
 @api_view(["POST"])
+@permission_classes([AllowAny])
 def register(request):
 
     if request.method == "POST":
@@ -74,6 +75,7 @@ def register(request):
 
 
 @api_view(["POST"])
+@permission_classes([AllowAny])
 def login(request):
 
     if request.method == "POST":
