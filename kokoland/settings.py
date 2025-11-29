@@ -31,8 +31,8 @@ else:
     print("✅ Production environment - using DigitalOcean environment variables")
 
 # Detect if running on DigitalOcean
-IS_DIGITALOCEAN = os.environ.get('DIGITALOCEAN_APP_ID') is not None
-IS_PRODUCTION = ENVIRONMENT == 'production' or IS_DIGITALOCEAN
+# IS_DIGITALOCEAN = os.environ.get('DIGITALOCEAN_APP_ID') is not None
+IS_PRODUCTION = ENVIRONMENT == 'production'# or IS_DIGITALOCEAN
 IS_LOCAL = not IS_PRODUCTION
 
 print(f"🚀 Environment: {'PRODUCTION' if IS_PRODUCTION else 'LOCAL DEVELOPMENT'}")
@@ -57,6 +57,7 @@ DEBUG = os.environ.get('DEBUG', 'True' if IS_LOCAL else 'False').lower() == 'tru
 # Hosts configuration
 if IS_PRODUCTION:
     ALLOWED_HOSTS = [
+        '.onrender.com',
         '.ondigitalocean.app',
         'localhost',
         '127.0.0.1',
@@ -85,6 +86,7 @@ else:
 CSRF_TRUSTED_ORIGINS = []
 if IS_PRODUCTION:
     CSRF_TRUSTED_ORIGINS = [
+        'https://*.onrender.com',
         'https://*.ondigitalocean.app',
     ]
     custom_domain = os.environ.get('CUSTOM_DOMAIN')

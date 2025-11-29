@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: kokoland
+    env: python
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate"
+    startCommand: "gunicorn kokoland.wsgi:application"
+    plan: starter
+    envVars:
+      - key: DJANGO_ENV
+        value: production
+      - key: DEBUG
+        value: False
+      - key: SECRET_KEY
+        generateValue: true
+      - key: EMAIL_HOST
+        value: smtp.gmail.com
+      - key: EMAIL_PORT
+        value: 587
+      - key: EMAIL_HOST_USER
+        value: yaraharby9@gmail.com
+      - key: EMAIL_HOST_PASSWORD
+        sync: false  # add manually in dashboard
+      - key: EMAIL_USE_TLS
+        value: True
+      - key: DATABASE_URL
+        fromDatabase:
+          name: kokoland
+          property: connectionString
+
+databases:
+  - name: kokoland
+    plan: free
+    engine: postgres
