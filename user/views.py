@@ -262,7 +262,24 @@ class listusers(APIView):
         if serializerr.data["is_admin"] == False:
             return Response({"message": "Don't have access"})
 
-        user = User.objects.all()
+        user = User.objects.filter(is_admin=False)
+        if not user:
+            return Response({"message": "There is no users"})
+
+        serializer = ListSerializer(user, many=True, context={"request": request})
+        return Response(serializer.data)
+
+# ----------------------------------------------------------------------------------
+
+class listadmins(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializerr = userProfileSerializer(request.user)
+        if serializerr.data["is_admin"] == False:
+            return Response({"message": "Don't have access"})
+
+        user = User.objects.filter(is_admin=True)
         if not user:
             return Response({"message": "There is no users"})
 

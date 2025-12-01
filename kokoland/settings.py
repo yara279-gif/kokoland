@@ -176,6 +176,7 @@ INSTALLED_APPS = [
     # Local apps
     'book',
     'user',
+    'buying',
 ]
 
 MIDDLEWARE = [
@@ -382,9 +383,9 @@ LOGGING = {
 # FINAL CONFIGURATION CHECK
 # =====================
 
-print(f"🔧 Configuration Summary:")
-print(f"   Environment: {'PRODUCTION' if IS_PRODUCTION else 'DEVELOPMENT'}")
-print(f"   Debug: {DEBUG}")
-print(f"   Database: {DATABASES['default']['ENGINE']}")
-print(f"   Allowed Hosts: {ALLOWED_HOSTS}")
-print("🎉 Settings loaded successfully!")
+# print(f"🔧 Configuration Summary:")
+# print(f"   Environment: {'PRODUCTION' if IS_PRODUCTION else 'DEVELOPMENT'}")
+# print(f"   Debug: {DEBUG}")
+# print(f"   Database: {DATABASES['default']['ENGINE']}")
+# print(f"   Allowed Hosts: {ALLOWED_HOSTS}")
+# print("🎉 Settings loaded successfully!")

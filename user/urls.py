@@ -19,6 +19,7 @@ from .views import (
     login,
     register,
     update_profile,
+    listadmins,
     # sendResetPasswordPage,
     CreateAdminView,
 )
@@ -37,6 +38,7 @@ urlpatterns = [
     path("updateuser/<int:id>/", updateuser.as_view()),
     path("deleteaccount/", delete_account, name="deleteaccount"),
     path("listusers/", listusers.as_view()),
+    path('listadmins/', listadmins.as_view()),
     path("updateprofile/", update_profile, name="updateprofile"),
     # password reset urls
     path("changepassword/", change_password, name="chpassword"),

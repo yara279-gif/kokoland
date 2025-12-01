@@ -27,8 +27,10 @@ class CustomizeBook(APIView):
             book_id = request.data.get('book')
             child_name = request.data.get('child_name')
             child_image = request.FILES.get('child_image')
+            user_id = request.data.get('user_id')
+            
   
-            if not book_id or not child_name or not child_image:
+            if not book_id or not child_name or not child_image or not user_id :
                 return Response(
                     {"error": "book_id, child's name and child's image are required."},
                     status=status.HTTP_400_BAD_REQUEST
@@ -144,7 +146,9 @@ class CustomizeBook(APIView):
                     child_name=child_name,
                     child_image=child_image,
                     child_age=request.data.get('child_age', ''),
-                    custom_book=custom_book
+                    custom_book=custom_book,
+                    user_id=user_id
+
                 )
 
                 
@@ -470,7 +474,17 @@ class CustomizeBook(APIView):
         doc.save(output_pdf_path)
         doc.close()
         print(f"PDF with replaced images saved to {output_pdf_path}")
-    
+#===============================================================================================
+
+@api_view(["GET"])
+def listCustomizedBooks(request):
+    if request.method == "GET":
+        permission_classes = [IsAuthenticated]
+        customized_books = Customizations.objects.all()
+
+        serializer = CustomizationSerializer(customized_books, many=True, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response({"msg": "not allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 #=========================================add book=================================================
 
