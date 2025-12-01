@@ -21,7 +21,8 @@ class PurchaseRequest(models.Model):
 
 class UserLibrary(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    custom_book = models.ForeignKey(Customizations, on_delete=models.CASCADE)
+    custom_book = models.ForeignKey(Customizations, on_delete=models.CASCADE,blank=True, null=True)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, blank=True, null=True)
     added_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

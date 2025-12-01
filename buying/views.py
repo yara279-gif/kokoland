@@ -50,7 +50,8 @@ class AdminProcessRequest(APIView):
             # Add book to user library
             UserLibrary.objects.create(
                 user=req.user,
-                custom_book=req.customization
+                custom_book=req.customization,
+                book=req.book,
             )
 
             return Response({"msg": "Approved and added to user library"})
