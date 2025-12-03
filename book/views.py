@@ -14,7 +14,8 @@ from .serializers import BookSerializer, CustomizationSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-
+from user.models import User
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class CustomizeBook(APIView):
@@ -140,6 +141,15 @@ class CustomizeBook(APIView):
                     name=f"customized_{child_name}_{book.title}.pdf"
                 )
                 
+                # Fetch User instance
+                try:
+                    user = User.objects.get(id=int(user_id))
+                except (ValueError, ObjectDoesNotExist):
+                    return Response(
+                        {"error": "Invalid or non-existent user_id."},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                
                 # Save to Customizations model
                 customization = Customizations.objects.create(
                     book=book,
@@ -147,7 +157,7 @@ class CustomizeBook(APIView):
                     child_image=child_image,
                     child_age=request.data.get('child_age', ''),
                     custom_book=custom_book,
-                    user_id=user_id
+                    user_id=user
 
                 )
 
