@@ -9,12 +9,18 @@ from rest_framework.permissions import IsAdminUser
 from .models import UserLibrary
 from rest_framework import generics, permissions
 from .models import PurchaseRequest, UserLibrary
+from django.contrib.auth import get_user_model
 
 class CreatePurchaseRequest(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
         user = request.user
+
+        # Prevent admins from creating purchase requests
+        if getattr(user, "is_admin", False) or getattr(user, "is_superuser", False) or getattr(user, "is_staff", False):
+            return Response({"error": "Admins cannot create purchase requests."}, status=403)
+
         book_id = request.data.get("book_id")
         customization_id = request.data.get("customization_id")
 
@@ -66,9 +72,15 @@ class AdminProcessRequest(APIView):
 
 #====================================================================================
 class MyLibrary(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        items = UserLibrary.objects.filter(user=request.user)
+        user = request.user
+
+        # Only normal users may access their library via this endpoint
+        if getattr(user, "is_admin", False) or getattr(user, "is_superuser", False) or getattr(user, "is_staff", False):
+            return Response({"error": "Admins/staff cannot access this endpoint."}, status=403)
+
+        items = UserLibrary.objects.filter(user=user)
         serializer = UserLibrarySerializer(items, many=True)
         return Response(serializer.data)

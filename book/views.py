@@ -16,13 +16,31 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from user.models import User
 from django.core.exceptions import ObjectDoesNotExist
+from gradio_client import Client, file
+
+import fitz
+import tempfile
+import os
+import io
+from django.core.files.base import ContentFile
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from PIL import Image
+from .models import Book, Customizations
+from rest_framework import generics
+from .serializers import BookSerializer, CustomizationSerializer
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from user.models import User
+from django.core.exceptions import ObjectDoesNotExist
+from gradio_client import Client, file
 
 
 class CustomizeBook(APIView):
-    # PDF.co API configuration
-    PDF_CO_API_KEY = "yaraharby4@gmail.com_BVVd7y05dquQ4Uop9MdyE5yARXYoc2Sjl4yVqyjy72RBvpXLbzGdPWUb9gGMxweT"
-    PDF_CO_BASE_URL = "https://api.pdf.co/v1"
-
+    permission_classes = [IsAuthenticated]  # Add authentication
+    
     def post(self, request, format=None):
         try:
             book_id = request.data.get('book')
@@ -30,8 +48,7 @@ class CustomizeBook(APIView):
             child_image = request.FILES.get('child_image')
             user_id = request.data.get('user_id')
             
-  
-            if not book_id or not child_name or not child_image or not user_id :
+            if not book_id or not child_name or not child_image or not user_id:
                 return Response(
                     {"error": "book_id, child's name and child's image are required."},
                     status=status.HTTP_400_BAD_REQUEST
@@ -42,18 +59,29 @@ class CustomizeBook(APIView):
             book_path = book.book_file.path
             original_character_name = book.char_name
             
+            print(f"\n{'='*70}")
+            print(f"STARTING BOOK CUSTOMIZATION")
+            print(f"{'='*70}")
+            print(f"Book: {book.title}")
+            print(f"Original Character: {original_character_name}")
+            print(f"New Name: {child_name}")
+            print(f"{'='*70}\n")
+            
             # Read and validate child image
             child_image_data = self.process_child_image(child_image)
             if not child_image_data:
                 return Response(
-                    {"error": "Invalid child image format. Supported formats: JPEG, PNG, WebP"},
+                    {"error": "Invalid child image format. Supported formats: JPEG, PNG, WebP, BMP, TIFF"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-
             
+            # Save child image to temporary file for Gradio Client
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp_child:
+                tmp_child.write(child_image_data)
+                child_image_path = tmp_child.name
+
             # Create a temporary directory to store modified PDF
             with tempfile.TemporaryDirectory() as temp_dir:
-
                 # Extract all images from PDF with their positions
                 images_info = self.extract_images_with_positions(book_path, temp_dir)
 
@@ -63,14 +91,26 @@ class CustomizeBook(APIView):
                         status=status.HTTP_400_BAD_REQUEST
                     )
                 
+                # Initialize Gradio Client
+                try:
+                    client = Client("shada-elewa/koko-land-demo")
+                    print("✅ Gradio Client initialized successfully")
+                except Exception as e:
+                    print(f"❌ Failed to initialize Gradio Client: {str(e)}")
+                    return Response(
+                        {"error": "AI service initialization failed"},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
+                
                 # Process each image through AI model
                 processed_images = {}
                 for i, img_info in enumerate(images_info):
-                    processed_image = self.process_with_ai_model(
+                    processed_image = self.process_with_gradio_client(
                         img_info['original_image_path'], 
-                        child_image_data,
+                        child_image_path,
                         temp_dir,
-                        img_info['image_key']
+                        img_info['image_key'],
+                        client
                     )
                     if processed_image:
                         processed_images[img_info['image_key']] = processed_image
@@ -78,6 +118,9 @@ class CustomizeBook(APIView):
                     else:
                         print(f"❌ Failed to process image {img_info['image_key']}")
 
+                # Clean up temporary child image
+                if os.path.exists(child_image_path):
+                    os.unlink(child_image_path)
                 
                 # Create a folder for processed images
                 processed_images_folder = os.path.join(temp_dir, "processed_images")
@@ -89,9 +132,8 @@ class CustomizeBook(APIView):
                     new_image_name = f"processed_{i:03d}.png"
                     new_image_path = os.path.join(processed_images_folder, new_image_name)
                     
-                    # Copy the file
-                    with open(image_path, 'rb') as src, open(new_image_path, 'wb') as dst:
-                        dst.write(src.read())
+                    # Copy the file with format conversion if needed
+                    self.convert_to_png_if_needed(image_path, new_image_path)
                     processed_image_files.append(new_image_name)
                 
                 # Step 1: Replace images in PDF
@@ -103,33 +145,29 @@ class CustomizeBook(APIView):
                     images_replaced_pdf
                 )
                 
-                # Step 2: Replace character names using PDF.co API
-                final_pdf_path = os.path.join(temp_dir, "final_customized.pdf")
-                
-                # Upload the PDF to PDF.co
-                uploaded_file_url = self.upload_file_to_pdfco(images_replaced_pdf)
-                if not uploaded_file_url:
+                # Check if PDF file exists and has content
+                if not os.path.exists(images_replaced_pdf):
                     return Response(
-                        {"error": "Failed to upload PDF for text replacement"},
+                        {"error": "Generated PDF file not found"},
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR
                     )
-
-                # Replace text using PDF.co API
-                replacement_success = self.replace_text_via_pdfco(
-                    uploaded_file_url, 
-                    original_character_name, 
-                    child_name, 
-                    final_pdf_path
-                )
                 
-                if not replacement_success:
-                    # Fallback: use the image-replaced PDF without text replacement
-                    print("⚠️ Text replacement failed, using image-replaced PDF as fallback")
-                    final_pdf_path = images_replaced_pdf
-                    character_replacements = 0
-                else:
-                    character_replacements = 1  # PDF.co doesn't return count, so we assume success
-                    print("✅ Character names replaced successfully using PDF.co API")
+                file_size = os.path.getsize(images_replaced_pdf)
+                print(f"📄 PDF file size after image replacement: {file_size} bytes")
+                
+                if file_size == 0:
+                    return Response(
+                        {"error": "Generated PDF file is empty"},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
+                
+                # Step 2: Replace character names using PyMuPDF (FREE, no API needed)
+                final_pdf_path, character_replacements = self.replace_character_name(
+                    images_replaced_pdf,
+                    original_character_name,
+                    child_name,
+                    temp_dir
+                )
                 
                 # Save the customized PDF
                 with open(final_pdf_path, 'rb') as f:
@@ -158,20 +196,27 @@ class CustomizeBook(APIView):
                     child_age=request.data.get('child_age', ''),
                     custom_book=custom_book,
                     user_id=user
-
                 )
-
+                
+                print(f"\n{'='*70}")
+                print(f"CUSTOMIZATION COMPLETE")
+                print(f"{'='*70}")
+                print(f"✅ Images processed: {len(processed_images)}/{len(images_info)}")
+                print(f"✅ Text replacements: {character_replacements}")
+                print(f"✅ Customization ID: {customization.id}")
+                print(f"{'='*70}\n")
                 
                 return Response({
                     "message": "Book customized successfully!",
                     "child_name": child_name,
                     "images_processed": len(processed_images),
                     "total_images": len(images_info),
+                    "character_replacements": character_replacements,
                     "character_replaced": character_replacements > 0,
-                    "original_character_replaced": original_character_name,
+                    "original_character_name": original_character_name,
                     "custom_book_url": customization.custom_book.url,
                     "customization_id": customization.id,
-                    "book_title": book.title
+                    "book_title": book.title,
                 }, status=status.HTTP_200_OK)
                 
         except Book.DoesNotExist:
@@ -188,138 +233,323 @@ class CustomizeBook(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    def upload_file_to_pdfco(self, file_path):
-        """Uploads file to PDF.co cloud storage"""
+    def replace_character_name(self, images_replaced_pdf, original_character_name, child_name, temp_dir):
+        """
+        Replace character name in PDF using PyMuPDF (FREE, no API needed)
+        """
+        final_pdf_path = os.path.join(temp_dir, "final_customized.pdf")
+        
+        print(f"\n{'='*70}")
+        print(f"TEXT REPLACEMENT - Using PyMuPDF")
+        print(f"{'='*70}")
+        print(f"Searching for: '{original_character_name}'")
+        print(f"Replacing with: '{child_name}'")
+        print(f"{'='*70}\n")
+        
+        # First, diagnose what text exists
+        self.diagnose_pdf_text(images_replaced_pdf, original_character_name)
+        
+        # Try standard replacement
+        print("🔧 Attempting standard text replacement...")
+        result = self.replace_text_in_pdf(
+            images_replaced_pdf,
+            original_character_name,
+            child_name,
+            final_pdf_path
+        )
+        
+        if result["success"] and result["replacements"] > 0:
+            print(f"✅ Text replacement successful: {result['replacements']} replacements")
+            return final_pdf_path, result["replacements"]
+        
+        # Try advanced method with redactions
+        print("\n🔧 Attempting advanced redaction method...")
+        result = self.advanced_text_replacement(
+            images_replaced_pdf,
+            original_character_name,
+            child_name,
+            final_pdf_path
+        )
+        
+        if result["success"] and result["replacements"] > 0:
+            print(f"✅ Advanced text replacement successful: {result['replacements']} replacements")
+            return final_pdf_path, result["replacements"]
+        
+        # Fallback: copy original (images already replaced)
+        print("\n⚠️ No text instances found - using PDF with replaced images only")
+        import shutil
+        shutil.copy2(images_replaced_pdf, final_pdf_path)
+        return final_pdf_path, 0
+
+    def diagnose_pdf_text(self, pdf_path, search_text):
+        """Diagnose what text exists in the PDF"""
         try:
-            api_url = f"{self.PDF_CO_BASE_URL}/file/upload/get-presigned-url"
-            params = {
-                "name": os.path.basename(file_path),
-                "contenttype": "application/octet-stream"
-            }
+            doc = fitz.open(pdf_path)
+            total_chars = 0
+            found_pages = []
             
-            headers = {
-                "x-api-key": self.PDF_CO_API_KEY
-            }
+            print(f"📋 Analyzing {len(doc)} pages for text content...")
             
-            print(f"📤 Uploading file to PDF.co: {file_path}")
-            response = requests.get(api_url, headers=headers, params=params)
+            for page_num in range(len(doc)):
+                page = doc[page_num]
+                text = page.get_text()
+                total_chars += len(text)
+                
+                if search_text.lower() in text.lower():
+                    found_pages.append(page_num + 1)
+                    lines = [line for line in text.split('\n') if search_text.lower() in line.lower()]
+                    print(f"\n✅ Found on page {page_num + 1}:")
+                    for line in lines[:2]:  # Show first 2 matches
+                        print(f"   '{line.strip()}'")
             
-            if response.status_code == 200:
-                json_data = response.json()
-                if not json_data.get("error", False):
-                    upload_url = json_data["presignedUrl"]
-                    uploaded_file_url = json_data["url"]
+            doc.close()
+            
+            if found_pages:
+                print(f"\n✅ Text '{search_text}' found on pages: {found_pages}")
+            else:
+                print(f"\n⚠️ Text '{search_text}' NOT found in PDF")
+                print(f"   Total text characters in PDF: {total_chars}")
+                
+                if total_chars == 0:
+                    print(f"   ⚠️ PDF contains NO extractable text (might be all images)")
                     
-                    # Upload the file
-                    with open(file_path, 'rb') as file:
-                        upload_response = requests.put(
-                            upload_url, 
-                            data=file, 
-                            headers={"content-type": "application/octet-stream"}
+        except Exception as e:
+            print(f"❌ Diagnosis error: {str(e)}")
+
+    def replace_text_in_pdf(self, pdf_path, old_text, new_text, output_path):
+        """Replace text in PDF using PyMuPDF standard method"""
+        try:
+            doc = fitz.open(pdf_path)
+            total_replacements = 0
+            pages_modified = []
+            
+            for page_num in range(len(doc)):
+                page = doc[page_num]
+                
+                # Search for text instances
+                text_instances = page.search_for(old_text)
+                
+                if text_instances:
+                    print(f"   Found {len(text_instances)} instance(s) on page {page_num + 1}")
+                    pages_modified.append(page_num + 1)
+                    
+                    for rect in text_instances:
+                        # Get text properties
+                        blocks = page.get_text("dict")["blocks"]
+                        font_size = 12  # default
+                        
+                        # Find font size from text block
+                        for block in blocks:
+                            if block["type"] == 0:  # text block
+                                for line in block["lines"]:
+                                    for span in line["spans"]:
+                                        span_rect = fitz.Rect(span["bbox"])
+                                        if span_rect.intersects(rect):
+                                            font_size = span["size"]
+                                            break
+                        
+                        # Expand rectangle slightly
+                        expanded_rect = rect + (-2, -2, 2, 2)
+                        
+                        # Cover old text with white rectangle
+                        page.draw_rect(expanded_rect, color=(1, 1, 1), fill=(1, 1, 1))
+                        
+                        # Adjust font size if new text is longer
+                        if len(new_text) > len(old_text):
+                            font_size = font_size * (len(old_text) / len(new_text))
+                        
+                        # Insert new text
+                        page.insert_text(
+                            (rect.x0, rect.y0 + rect.height * 0.8),
+                            new_text,
+                            fontsize=font_size,
+                            fontname="helv",
+                            color=(0, 0, 0)
                         )
-                    
-                    if upload_response.status_code == 200:
-                        print(f"✅ File uploaded successfully: {uploaded_file_url}")
-                        return uploaded_file_url
-                    else:
-                        print(f"❌ Upload failed: {upload_response.status_code}")
-                else:
-                    print(f"❌ PDF.co API error: {json_data.get('message', 'Unknown error')}")
+                        
+                        total_replacements += 1
+            
+            if total_replacements > 0:
+                doc.save(output_path, garbage=4, deflate=True, clean=True)
+                doc.close()
+                return {
+                    "success": True,
+                    "replacements": total_replacements,
+                    "pages_modified": pages_modified
+                }
             else:
-                print(f"❌ Request failed: {response.status_code} {response.reason}")
-            
-            return None
-            
+                doc.close()
+                return {"success": False, "replacements": 0}
+                
         except Exception as e:
-            print(f"❌ Error uploading to PDF.co: {str(e)}")
-            return None
+            print(f"❌ Text replacement error: {str(e)}")
+            return {"success": False, "replacements": 0, "error": str(e)}
 
-    def replace_text_via_pdfco(self, uploaded_file_url, old_value, new_value, destination_file):
-        """Replaces text in PDF using PDF.co API"""
+    def advanced_text_replacement(self, pdf_path, old_text, new_text, output_path):
+        """Advanced text replacement using redaction annotations"""
         try:
-            api_url = f"{self.PDF_CO_BASE_URL}/pdf/edit/replace-text"
+            doc = fitz.open(pdf_path)
+            total_replacements = 0
             
-            headers = {
-                "x-api-key": self.PDF_CO_API_KEY,
-                "Content-Type": "application/json"
-            }
+            # Create variations to search for
+            search_variations = list(set([
+                old_text,
+                old_text.strip(),
+                old_text.lower(),
+                old_text.upper(),
+                old_text.title()
+            ]))
             
-            payload = {
-                "name": os.path.basename(destination_file),
-                "password": "",  # No password
-                "url": uploaded_file_url,
-                "searchString": old_value,
-                "replaceString": new_value +" ",
-                "caseSensitive": False,  # Case insensitive replacement
-                "regexSearch": False     # Exact text search
-            }
+            print(f"   Trying variations: {search_variations}")
             
-            print(f"🔄 Replacing '{old_value}' with '{new_value}' via PDF.co API...")
-            response = requests.post(api_url, json=payload, headers=headers)
-            
-            if response.status_code == 200:
-                json_data = response.json()
-                if not json_data.get("error", False):
-                    result_file_url = json_data["url"]
+            for page_num in range(len(doc)):
+                page = doc[page_num]
+                
+                for search_text in search_variations:
+                    areas = page.search_for(search_text)
                     
-                    # Download the result file
-                    download_response = requests.get(result_file_url, stream=True)
-                    
-                    if download_response.status_code == 200:
-                        # Ensure destination directory exists
-                        os.makedirs(os.path.dirname(destination_file), exist_ok=True)
-                        
-                        with open(destination_file, 'wb') as file:
-                            for chunk in download_response.iter_content(chunk_size=8192):
-                                file.write(chunk)
-                        
-                        print(f"✅ Result file saved: {destination_file}")
-                        return True
-                    else:
-                        print(f"❌ Download failed: {download_response.status_code}")
-                else:
-                    print(f"❌ PDF.co replacement error: {json_data.get('message', 'Unknown error')}")
+                    for area in areas:
+                        # Add redaction with replacement text
+                        page.add_redact_annot(
+                            area, 
+                            text=new_text, 
+                            fontsize=11,
+                            fill=(1, 1, 1),
+                            text_color=(0, 0, 0)
+                        )
+                        total_replacements += 1
+                
+                # Apply redactions
+                page.apply_redactions()
+            
+            if total_replacements > 0:
+                doc.save(output_path, garbage=4, deflate=True)
+                doc.close()
+                print(f"   Redaction method: {total_replacements} replacements")
+                return {"success": True, "replacements": total_replacements}
             else:
-                print(f"❌ Request failed: {response.status_code} {response.reason}")
-            
-            return False
-            
+                doc.close()
+                return {"success": False, "replacements": 0}
+                
         except Exception as e:
-            print(f"❌ Error in PDF.co text replacement: {str(e)}")
-            return False
+            print(f"❌ Advanced replacement error: {str(e)}")
+            return {"success": False, "replacements": 0, "error": str(e)}
 
-    # ... keep all your existing methods the same (process_child_image, extract_images_with_positions, etc.)
+    def convert_to_png_if_needed(self, source_path, dest_path):
+        """Convert any image format to PNG for consistency"""
+        try:
+            with Image.open(source_path) as img:
+                if img.mode in ('RGBA', 'LA', 'P', 'CMYK'):
+                    img = img.convert('RGB')
+                img.save(dest_path, format='PNG')
+        except Exception as e:
+            print(f"❌ Error converting image: {str(e)}")
+            with open(source_path, 'rb') as src, open(dest_path, 'wb') as dst:
+                dst.write(src.read())
+
+    def process_with_gradio_client(self, book_image_path, child_image_path, temp_dir, image_key, client):
+        """Process book image with child image using Gradio Client"""
+        try:
+            print(f"  🤖 Processing {image_key} with Gradio Client...")
+            
+            processed_book_image_path = self.process_book_image_for_gradio(book_image_path, temp_dir, image_key)
+            if not processed_book_image_path:
+                print(f"  ❌ Failed to process book image for {image_key}")
+                return None
+            
+            print(f"  🚀 Sending request to Gradio Client...")
+            try:
+                result = client.predict(
+                    cartoon_img=file(processed_book_image_path),
+                    kid_img=file(child_image_path),
+                    api_name="/run_app"
+                )
+                
+                print(f"  📨 Gradio Client response received")
+                
+                if result:
+                    processed_image_path = os.path.join(temp_dir, f"gradio_result_{image_key}")
+                    
+                    if isinstance(result, str) and os.path.exists(result):
+                        source_path = result
+                    elif isinstance(result, bytes):
+                        source_path = os.path.join(temp_dir, f"raw_result_{image_key}.dat")
+                        with open(source_path, 'wb') as f:
+                            f.write(result)
+                    else:
+                        print(f"  ❌ Unexpected result type: {type(result)}")
+                        return None
+                    
+                    try:
+                        with Image.open(source_path) as img:
+                            final_path = os.path.join(temp_dir, f"gradio_final_{image_key}.png")
+                            img.save(final_path, format='PNG')
+                            return final_path
+                    except Exception as img_error:
+                        print(f"  ❌ Cannot identify image file: {str(img_error)}")
+                        return None
+                else:
+                    print(f"  ❌ No result from Gradio Client")
+                    return None
+                    
+            except Exception as api_error:
+                print(f"  ❌ Gradio Client API error: {str(api_error)}")
+                return None
+                
+        except Exception as e:
+            print(f"  ❌ Error processing image {image_key}: {str(e)}")
+            return None
+
+    def process_book_image_for_gradio(self, book_image_path, temp_dir, image_key):
+        """Process book image to ensure compatibility with Gradio Client"""
+        try:
+            with Image.open(book_image_path) as img:
+                if img.mode in ('RGBA', 'LA', 'P', 'CMYK'):
+                    img = img.convert('RGB')
+                
+                max_size = 2048
+                if max(img.size) > max_size:
+                    ratio = max_size / max(img.size)
+                    new_size = (int(img.size[0] * ratio), int(img.size[1] * ratio))
+                    img = img.resize(new_size, Image.Resampling.LANCZOS)
+                
+                processed_path = os.path.join(temp_dir, f"gradio_input_{image_key}.jpg")
+                img.save(processed_path, format='JPEG', quality=95)
+                return processed_path
+                
+        except Exception as e:
+            print(f"    ❌ Error processing book image {image_key}: {str(e)}")
+            return book_image_path
+
     def process_child_image(self, child_image):
         """Process and validate child image, convert to appropriate format"""
         try:
-            # Read the image
             child_image_data = child_image.read()
             print(f"👶 Child image size: {len(child_image_data)} bytes")
             
-            # Validate image format using PIL
-            with Image.open(io.BytesIO(child_image_data)) as img:
-                print(f"🖼️ Child image format: {img.format}, mode: {img.mode}, size: {img.size}")
-                
-                # Convert to RGB if necessary (removes alpha channel)
-                if img.mode in ('RGBA', 'LA', 'P'):
-                    img = img.convert('RGB')
-                    print("🔄 Converted child image to RGB")
-                
-                # Save as JPEG for better compatibility
-                output_buffer = io.BytesIO()
-                img.save(output_buffer, format='JPEG', quality=95)
-                processed_data = output_buffer.getvalue()
-                print(f"💾 Processed child image size: {len(processed_data)} bytes")
-                return processed_data
-                
+            img = Image.open(io.BytesIO(child_image_data))
+            print(f"🖼️ Child image format: {img.format}, mode: {img.mode}, size: {img.size}")
+            
+            if img.mode in ('RGBA', 'LA', 'P', 'CMYK'):
+                img = img.convert('RGB')
+            
+            max_size = 1024
+            if max(img.size) > max_size:
+                ratio = max_size / max(img.size)
+                new_size = (int(img.size[0] * ratio), int(img.size[1] * ratio))
+                img = img.resize(new_size, Image.Resampling.LANCZOS)
+            
+            output_buffer = io.BytesIO()
+            img.save(output_buffer, format='JPEG', quality=95)
+            processed_data = output_buffer.getvalue()
+            return processed_data
+            
         except Exception as e:
             print(f"❌ Error processing child image: {str(e)}")
             return None
 
     def extract_images_with_positions(self, pdf_path, output_folder):
-        """
-        Extract all images from PDF with their positions and metadata
-        """
+        """Extract all images from PDF with their positions and metadata"""
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
         
@@ -328,141 +558,59 @@ class CustomizeBook(APIView):
         
         for page_num in range(len(doc)):
             page = doc[page_num]
-            
-            # Get all images on the page
             image_list = page.get_images()
             
             for img_index, img in enumerate(image_list):
-                # Extract image information
                 xref = img[0]
                 pix = fitz.Pixmap(doc, xref)
-                
-                # Get image position (bounding box)
                 image_instances = page.get_image_rects(xref)
                 
                 for instance_num, bbox in enumerate(image_instances):
-                    # Generate unique filename and key
                     img_filename = f"page_{page_num}_img_{img_index}_instance_{instance_num}.png"
                     img_path = os.path.join(output_folder, img_filename)
                     image_key = f"page_{page_num}_img_{img_index}_instance_{instance_num}"
                     
-                    # Save the image
-                    if pix.n - pix.alpha < 4:  # this is GRAY or RGB
-                        pix.save(img_path)
-                    else:  # CMYK: convert to RGB first
-                        pix1 = fitz.Pixmap(fitz.csRGB, pix)
-                        pix1.save(img_path)
-                        pix1 = None
-                    
-                    # Store image information
-                    image_info = {
-                        'page_num': page_num,
-                        'image_index': img_index,
-                        'instance_num': instance_num,
-                        'bbox': bbox,
-                        'original_image_path': img_path,
-                        'image_key': image_key,
-                        'xref': xref
-                    }
-                    images_info.append(image_info)
+                    try:
+                        if pix.n - pix.alpha < 4:
+                            pix.save(img_path)
+                        else:
+                            pix1 = fitz.Pixmap(fitz.csRGB, pix)
+                            pix1.save(img_path)
+                            pix1 = None
+                        
+                        image_info = {
+                            'page_num': page_num,
+                            'image_index': img_index,
+                            'instance_num': instance_num,
+                            'bbox': bbox,
+                            'original_image_path': img_path,
+                            'image_key': image_key,
+                            'xref': xref
+                        }
+                        images_info.append(image_info)
+                        
+                    except Exception as e:
+                        print(f"  ⚠️ Failed to extract image {image_key}: {str(e)}")
+                        continue
                 
-                pix = None  # free pixmap resources
+                pix = None
         
         doc.close()
         
-        print(f"Extracted {len(images_info)} images to {output_folder}")
+        print(f"📸 Extracted {len(images_info)} images")
         return images_info
 
-    def process_with_ai_model(self, book_image_path, child_image_data, temp_dir, image_key):
-        """Send book image and child image to AI model and get processed image"""
-        try:
-            FASTAPI_URL = "https://homelessly-spathic-eddie.ngrok-free.dev/api/face-transfer/upload"
-            
-            print(f"  🤖 Sending {image_key} to AI model...")
-            
-            # Process book image to ensure compatibility
-            processed_book_image_path = self.process_book_image_for_api(book_image_path, temp_dir, image_key)
-            if not processed_book_image_path:
-                print(f"  ❌ Failed to process book image for {image_key}")
-                return None
-            
-            # Get file sizes for debugging
-            book_file_size = os.path.getsize(processed_book_image_path)
-            child_file_size = len(child_image_data)
-            print(f"  📊 File sizes - Book: {book_file_size} bytes, Child: {child_file_size} bytes")
-            
-            # Prepare files for sending with proper content types
-            with open(processed_book_image_path, 'rb') as book_img_file:
-                files = {
-                    'target_image': ('target_image.jpg', book_img_file, 'image/jpeg'),
-                    'source_image': ('source_image.jpg', child_image_data, 'image/jpeg')
-                }
-                
-                data = {'model': 'inswapper_128'}
-                
-                print(f"  🚀 Sending request to FastAPI...")
-                
-                response = requests.post(FASTAPI_URL, files=files, data=data, timeout=60)
-                print(f"  📨 FastAPI response status: {response.status_code}")
-                
-                if response.status_code == 200:
-                    try:
-                        test_img = Image.open(io.BytesIO(response.content))
-                        print(f"  ✅ Valid image response: {test_img.format}, {test_img.size}")
-                        
-                        processed_image_path = os.path.join(temp_dir, f"processed_{image_key}.png")
-                        with open(processed_image_path, 'wb') as f:
-                            f.write(response.content)
-                        
-                        print(f"  💾 Saved processed image: {processed_image_path}")
-                        return processed_image_path
-                    except Exception as img_error:
-                        print(f"  ❌ Invalid image response: {str(img_error)}")
-                        return None
-                else:
-                    print(f"  ❌ AI model error: {response.status_code} - {response.text}")
-                    return None
-                    
-        except Exception as e:
-            print(f"  ❌ Error processing image {image_key}: {str(e)}")
-            return None
-
-    def process_book_image_for_api(self, book_image_path, temp_dir, image_key):
-        """Process book image to ensure compatibility with AI model"""
-        try:
-            with Image.open(book_image_path) as img:
-                print(f"    📖 Book image original - format: {img.format}, mode: {img.mode}, size: {img.size}")
-                
-                if img.mode in ('RGBA', 'LA', 'P'):
-                    img = img.convert('RGB')
-                    print(f"    🔄 Converted book image to RGB")
-                
-                processed_path = os.path.join(temp_dir, f"processed_book_{image_key}.jpg")
-                img.save(processed_path, format='JPEG', quality=95)
-                print(f"    💾 Saved processed book image: {processed_path}")
-                return processed_path
-                
-        except Exception as e:
-            print(f"    ❌ Error processing book image {image_key}: {str(e)}")
-            return book_image_path
-
     def replace_all_images(self, pdf_path, images_info, new_images_folder, output_pdf_path):
-        """
-        Replaces all extracted images with new images from a folder.
-        """
+        """Replaces all extracted images with new images from a folder."""
         doc = fitz.open(pdf_path)
         
-        # Get list of new image files
         new_image_files = [f for f in os.listdir(new_images_folder) 
                           if f.lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp'))]
         new_image_files.sort()
         
-        # Check if we have enough replacement images
         if len(new_image_files) < len(images_info):
-            print(f"Warning: Only {len(new_image_files)} new images found, but {len(images_info)} images need replacement.")
-            print("Some images will not be replaced.")
+            print(f"⚠️ Only {len(new_image_files)} new images found for {len(images_info)} positions")
         
-        # Replace each image
         for i, img_info in enumerate(images_info):
             if i < len(new_image_files):
                 new_image_path = os.path.join(new_images_folder, new_image_files[i])
@@ -470,21 +618,19 @@ class CustomizeBook(APIView):
                 bbox = img_info['bbox']
                 
                 page = doc[page_num]
-                
-                # Remove the old image by drawing a white rectangle over it
                 page.draw_rect(bbox, color=(1, 1, 1), fill=(1, 1, 1), overlay=False)
                 
-                # Insert the new image at the same position
-                page.insert_image(bbox, filename=new_image_path)
-                
-                print(f"Replaced image on page {page_num} at position {bbox}")
-            else:
-                print(f"No replacement image available for image {i} on page {img_info['page_num']}")
+                try:
+                    page.insert_image(bbox, filename=new_image_path)
+                except Exception as e:
+                    print(f"❌ Failed to insert image {new_image_path}: {str(e)}")
+                    page.draw_rect(bbox, color=(0.9, 0.9, 0.9), fill=(0.9, 0.9, 0.9), overlay=False)
         
         doc.save(output_pdf_path)
         doc.close()
-        print(f"PDF with replaced images saved to {output_pdf_path}")
+        print(f"✅ PDF with replaced images saved")
 #===============================================================================================
+
 
 @api_view(["GET"])
 def listCustomizedBooks(request):
