@@ -343,6 +343,7 @@ Below is the list of API endpoints available in the Book application:
 | ------- | --------------------------------- | ----------------------------------------------- |
 | **GET** | `books/search_books/?q=<search_query>` | Search for books by title, author, or category. |
 add book 
+`books/addbook/`
 Request
 ```json
 {
@@ -370,6 +371,7 @@ Response
 
 ```
 List Books (books)
+`books/books/`
 Response
 ```json
 [
@@ -391,6 +393,7 @@ Response
 
 ```
 Retrieve Book
+`books/books/<pk>/`
 Response
 ```json
 {
@@ -404,6 +407,7 @@ Response
 
 ```
 Update Book
+`books/update_book/<pk>/`
 Request
 ```json
 {
@@ -428,6 +432,7 @@ Response
 
 ```
 Delete Book
+`books/delete_book/<pk>/`
 Response
 ```json
 {
@@ -436,6 +441,7 @@ Response
 
 ```
 Search Books
+ `books/search_books/?q=<search_query>`
 Response
 ```json
 [
@@ -448,6 +454,7 @@ Response
 ]
 ```
 Customize Book
+`books/customize/`  
 Request
 ```json
 {
@@ -473,6 +480,7 @@ Response
 
 ```
 List Customizations
+`books/listcustomizations/`
 Response
 ```json
 [
@@ -496,7 +504,7 @@ Response
 | **POST** | `buy/admin/requests/<request_id>/process/` | Admin: Approve or reject a purchase request                |
 | **GET**  | `buy/userlibrary/`                         | Get all books/customizations in the current user’s library |
 Create Purchase Request
-
+`buy/purrequests/`  
 ```json
 {
   "book_id": 1,
@@ -513,6 +521,7 @@ Response
 
 ```
 Admin List All Requests
+ `buy/admin/requests/`   
 Response
 ```json
 [
@@ -536,6 +545,7 @@ Response
 
 ```
 Admin Process Request
+`buy/admin/requests/<request_id>/process/`
 ```json
 {
   "action": "approve"
@@ -557,6 +567,7 @@ Response – Reject
 
 ```
 Get User Library (books)
+`buy/userlibrary/`
 Response
 ```json
 [
