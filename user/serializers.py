@@ -40,8 +40,7 @@ class userRegisterSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if attrs["password"] != attrs["password2"]:
             raise serializers.ValidationError({"password2": "password dont match"})
-        if attrs["is_admin"] == True:
-            User.is_admin = True
+
             
         return super().validate(attrs)
 
