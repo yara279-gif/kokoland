@@ -15,14 +15,14 @@
 ## Features
 
 - Feature 1: *admistration of users and books*  
-- Feature 2: *puy and sale books*  
+- Feature 2: *buy and sale books*  
 - Feature 3: *custoimze your book*  
 
 
 ---
 
 ## Usage 
-each end point will be discriped
+each endpoint will be discriped
 ### Authentication
 
 | Method     | Endpoint              | Description                            |
