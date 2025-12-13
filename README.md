@@ -33,24 +33,57 @@ each endpoint will be discriped
 | **DELETE** | `/user/deleteaccount/` | Delete currently authenticated account |
 | **GET**    | `/user/profile/`       | Get authenticated user profile         |
 
+
+### User Profile
+
+| Method  | Endpoint              | Description                       |
+| ------- | --------------------- | --------------------------------- |
+| **PUT** | `/user/updateprofile/` | Update authenticated user profile |
+
+### Password Management
+
+| Method   | Endpoint                            | Description                      |
+| -------- | ----------------------------------- | -------------------------------- |
+| **POST** | `/user/changepassword/`              | Change password (old → new)      |
+| **POST** | `/user/sendrestpasswordemail/`       | Send reset password email        |
+| **POST** | `/user/resetpassword/<uid>/<token>/` | Reset password using email token |
+
+### Admin User Management (Admin Only)
+
+| Method    | Endpoint                   | Description             |
+| --------- | -------------------------- | ----------------------- |
+| **POST**  | `/user/addadmin/`           | Create a new admin user |
+| **POST**  | `/user/adduser/`            | Create a regular user   |
+| **GET**   | `/user/listusers/`          | List all users          |
+| **GET**   | `/user/retrieveuser/<id>/`  | Get user details by ID  |
+| **GET**   | `/user/searchuser/<email>/` | Search user by email    |
+| **POST**  | `/user/deleteuser/<id>/`    | Delete a user           |
+| **PATCH** | `/user/updateuser/<id>/`    | Update a user           |
+
 ##Input (Request Body)
 ### Register
 request 
 ```json
 
 {
-  "email": "user@example.com",
-  "password": "12345678"
+    "email":"yaraharby1@gmail.com",
+    "first_name":"yra",
+    "last_name":"yaya",
+    "address":"imbaba",
+    "payment_info":"visa",
+    "password":"123",
+    "password2":"123"
 }
 ```
 Output (Response)
 ```json
 {
-  "email": "user@example.com",
-  "first_name": "Yara",
-  "last_name": "Harby",
-  "address": "Giza",
-  "payment_info": "Visa 1234"
+    "is_admin": true,
+    "token": {
+        "refresh": "",
+        "access": ""
+    },
+    "msg": "login successfull"
 }
 ```
 
@@ -65,8 +98,12 @@ Input
 
 Output
 {
-  "email": "user@example.com",
-  "is_admin": false
+    "is_admin": true,
+    "token": {
+        "refresh": "",
+        "access": ""
+    },
+    "msg": "login successfull"
 }
 ```
 User Profile
@@ -85,7 +122,17 @@ Output Example
   "payment_info": "Visa 1234"
 }
 ```
+logout
+```json
+{
+    "refresh_token":""
+}
+```
+
 Update Profile
+
+PUT /user/updateprofile/
+Authorization: Bearer <access_token>
 
 Input
 ```json
@@ -222,34 +269,73 @@ List Users
   }
 ]
 ```
+retrieve user
+GET /user/retrieveuser/<pk:id>/
+
+Description: Get user details by ID
+
+Request
+`GET /user/retrieveuser/1/`
+
+```json
+{
+  "id": 1,
+  "email": "user@example.com",
+  "first_name": "Yara",
+  "last_name": "Harby"
+}
+
+```
+search user
+GET /user/searchuser/<str:first_name>/
+
+Description: Search user by first name
+
+Request
+`GET /user/searchuser/Yara/`
+Response
+```json
+[
+  {
+    "email": "user@example.com",
+    "first_name": "Yara"
+  }
+]
+
+```
+PATCH /user/updateuser/<pk:id>/
+
+Description: Update user
+
+Request
+```json
+{
+  "first_name": "NewName"
+}
+
+```
+Response
+```json
+{
+  "message": "updated succesfully"
+}
+
+```
+DELETE /user/deleteuser/<pk:id>/
+
+Description: Delete a user
+
+Request
+`DELETE /user/deleteuser/1/`
+Response
+```json
+{
+  "message": "deleted succesfully"
+}
+
+```
 
 
-### User Profile
-
-| Method  | Endpoint              | Description                       |
-| ------- | --------------------- | --------------------------------- |
-| **GET** | `/user/updateprofile/` | Get profile data for update       |
-| **PUT** | `/user/updateprofile/` | Update authenticated user profile |
-
-### Password Management
-
-| Method   | Endpoint                            | Description                      |
-| -------- | ----------------------------------- | -------------------------------- |
-| **POST** | `/user/changepassword/`              | Change password (old → new)      |
-| **POST** | `/user/sendrestpasswordemail/`       | Send reset password email        |
-| **POST** | `/user/resetpassword/<uid>/<token>/` | Reset password using email token |
-
-### Admin User Management (Admin Only)
-
-| Method    | Endpoint                   | Description             |
-| --------- | -------------------------- | ----------------------- |
-| **POST**  | `/user/addadmin/`           | Create a new admin user |
-| **POST**  | `/user/adduser/`            | Create a regular user   |
-| **GET**   | `/user/listusers/`          | List all users          |
-| **GET**   | `/user/retrieveuser/<id>/`  | Get user details by ID  |
-| **GET**   | `/user/searchuser/<email>/` | Search user by email    |
-| **POST**  | `/user/deleteuser/<id>/`    | Delete a user           |
-| **PATCH** | `/user/updateuser/<id>/`    | Update a user           |
 
 
 
