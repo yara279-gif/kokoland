@@ -24,18 +24,18 @@ if ENVIRONMENT == 'development':
     env_file = BASE_DIR / '.env.local'
     if env_file.exists():
         load_dotenv(env_file)
-        print("✅ Loaded .env.local for development")
+        print(" Loaded .env.local for development")
     else:
-        print("⚠️  .env.local not found, using environment variables")
+        print(".env.local not found, using environment variables")
 else:
-    print("✅ Production environment - using DigitalOcean environment variables")
+    print("Production environment - using DigitalOcean environment variables")
 
 # Detect if running on DigitalOcean
 # IS_DIGITALOCEAN = os.environ.get('DIGITALOCEAN_APP_ID') is not None
 IS_PRODUCTION = ENVIRONMENT == 'production'# or IS_DIGITALOCEAN
 IS_LOCAL = not IS_PRODUCTION
 
-print(f"🚀 Environment: {'PRODUCTION' if IS_PRODUCTION else 'LOCAL DEVELOPMENT'}")
+print(f" Environment: {'PRODUCTION' if IS_PRODUCTION else 'LOCAL DEVELOPMENT'}")
 
 # =====================
 # SECURITY SETTINGS
@@ -46,10 +46,9 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 
 if not SECRET_KEY:
     if IS_PRODUCTION:
-        raise ValueError("❌ SECRET_KEY environment variable is required in production!")
+        raise ValueError("SECRET_KEY environment variable is required in production!")
     else:
         SECRET_KEY = 'django-insecure-dev-key-only-for-local-development'
-        print("⚠️  Using development SECRET_KEY - change this in production!")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True' if IS_LOCAL else 'False').lower() == 'true'
@@ -119,7 +118,6 @@ if IS_PRODUCTION:
                 ssl_require=True
             )
         }
-        print("✅ Using DigitalOcean PostgreSQL database")
     else:
         # Fallback to SQLite if no database is configured
         DATABASES = {
@@ -128,7 +126,6 @@ if IS_PRODUCTION:
                 'NAME': BASE_DIR / 'db.sqlite3',
             }
         }
-        print("⚠️  No DATABASE_URL found, using SQLite (add a database in render.yaml)")
 else:
     # Local development database
     LOCAL_DB_ENGINE = os.environ.get('LOCAL_DB_ENGINE', 'sqlite')
@@ -144,7 +141,6 @@ else:
                 'PORT': os.environ.get('LOCAL_DB_PORT', '5432'),
             }
         }
-        print("✅ Using local PostgreSQL database")
     else:
         # Default to SQLite for local development
         DATABASES = {
@@ -153,7 +149,6 @@ else:
                 'NAME': BASE_DIR / 'db.sqlite3',
             }
         }
-        print("✅ Using local SQLite database")
 
 # =====================
 # APPLICATION DEFINITION
@@ -211,6 +206,18 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'kokoland.wsgi.application'
 
+
+# Cache Configuration (using Redis for production)
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+    }
+}
+
+# File Upload Settings
+DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50MB
 # =====================
 # PASSWORD VALIDATION
 # =====================
@@ -278,8 +285,8 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=5),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=15),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     'ALGORITHM': 'HS256',
@@ -303,14 +310,14 @@ if IS_LOCAL:
         "http://localhost:8000",
         "http://127.0.0.1:8000",
     ]
-    print("✅ CORS: All origins allowed for local development")
+
 else:
     # Production: Specific origins only
     CORS_ALLOW_ALL_ORIGINS = False
     CORS_ALLOWED_ORIGINS = []
     provided_cors = os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',')
     CORS_ALLOWED_ORIGINS = [origin.strip() for origin in provided_cors if origin.strip()]
-    print(f"✅ CORS: Restricted to {CORS_ALLOWED_ORIGINS or 'no origins'}")
+    
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -335,7 +342,7 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() == 'true'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER or 'noreply@kokoland.com'
-print("✅ Email: Using SMTP backend for production")
+
 
 PASSWORD_RESET_TIMEOUT = 900  # 15 minutes
 AUTH_USER_MODEL = 'user.User'
