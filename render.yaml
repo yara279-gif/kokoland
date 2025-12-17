@@ -1,9 +1,10 @@
 services:
   - type: web
-    name: kokoland
     env: python
-    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate"
-    startCommand: "gunicorn kokoland.wsgi:application"
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn --workers 2 --timeout 600 --max-requests 1000 --max-requests-jitter 50 your_app.wsgi:application"
+    name: kokoland
+ 
     postDeployCommand: "python manage.py migrate"
     plan: starter
     envVars:
@@ -27,6 +28,7 @@ services:
         fromDatabase:
           name: kokoland
           property: connectionString
+
 
 databases:
   - name: kokoland
