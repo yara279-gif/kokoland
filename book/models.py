@@ -26,7 +26,7 @@ class Book(models.Model):
     
 class Customizations(models.Model):
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     child_name = models.CharField(max_length=100)
     child_image = models.BinaryField(null=True, blank=True)
     child_image_type = models.CharField(max_length=50, blank=True,null=True)

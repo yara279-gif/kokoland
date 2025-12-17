@@ -30,19 +30,30 @@ class BookSerializer(serializers.ModelSerializer):
             reverse("book-file", args=[obj.id])
         )
 
+from rest_framework import serializers
+from django.urls import reverse
+from .models import Customizations
 
 class CustomizationSerializer(serializers.ModelSerializer):
     child_image_url = serializers.SerializerMethodField()
     custom_book_url = serializers.SerializerMethodField()
     book_title = serializers.CharField(source='book.title', read_only=True)
+    book_id = serializers.IntegerField(source='book.id', read_only=True)
     user_email = serializers.CharField(source='user_id.email', read_only=True)
 
     class Meta:
         model = Customizations
         fields = [
-            "id", "book", "book_title", "user_id", "user_email",
-            "child_name", "child_age", "created_at",
-            "child_image_url", "custom_book_url",
+            "id",
+            "book_id",
+            "book_title",
+            "user_id",
+            "user_email",
+            "child_name",
+            "child_age",
+            "created_at",
+            "child_image_url",
+            "custom_book_url",
         ]
         read_only_fields = ["id", "created_at"]
 
@@ -50,14 +61,20 @@ class CustomizationSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         if not request or not obj.child_image:
             return None
-        return request.build_absolute_uri(
-            reverse("custom-child-image", args=[obj.id])
-        )
+        try:
+            return request.build_absolute_uri(
+                reverse("custom-child-image", args=[obj.id])
+            )
+        except Exception:
+            return None
 
     def get_custom_book_url(self, obj):
         request = self.context.get("request")
         if not request or not obj.custom_book:
             return None
-        return request.build_absolute_uri(
-            reverse("custom-book-file", args=[obj.id])
-        )
+        try:
+            return request.build_absolute_uri(
+                reverse("custom-book-file", args=[obj.id])
+            )
+        except Exception:
+            return None
