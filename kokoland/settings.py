@@ -313,7 +313,7 @@ if IS_LOCAL:
 
 else:
     # Production: Specific origins only
-    CORS_ALLOW_ALL_ORIGINS = False
+    CORS_ALLOW_ALL_ORIGINS = True
     CORS_ALLOWED_ORIGINS = []
     provided_cors = os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',')
     CORS_ALLOWED_ORIGINS = [origin.strip() for origin in provided_cors if origin.strip()]
