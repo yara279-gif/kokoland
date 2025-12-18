@@ -1,0 +1,3536 @@
+{
+	"info": {
+		"name": "Kokoland API - Comprehensive Collection",
+		"description": "# Kokoland API Collection\n\nThis collection provides comprehensive documentation and examples for all Kokoland API endpoints.\n\n## Authentication\n\nMost endpoints require JWT Bearer Token authentication. Use the `{{access}}` variable for user tokens or `{{admin_access}}` for admin tokens.\n\n## Base URL\n\nSet the `{{baseUrl}}` variable to your API base URL (default: `https://kokoland.onrender.com`).\n\n## Collection Variables\n\n- `baseUrl`: Base URL for all API requests\n- `access`: User access token (JWT)\n- `refresh`: User refresh token (JWT)\n- `admin_access`: Admin access token (JWT)\n\n## Getting Started\n\n1. Set the `baseUrl` variable\n2. Register a new user or login to get tokens\n3. Set the `access` and `refresh` variables from the login response\n4. Start making authenticated requests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "kokoland-api"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://kokoland.onrender.com",
+			"type": "string"
+		},
+		{
+			"key": "access",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refresh",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "admin_access",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Home",
+			"item": [
+				{
+					"name": "GET / - Home",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/",
+							"host": ["{{baseUrl}}"],
+							"path": [""]
+						},
+						"description": "Returns a welcome message indicating the API is working.\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X GET {{baseUrl}}/\n```\n\n---"
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/",
+									"host": ["{{baseUrl}}"],
+									"path": [""]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Kokoland API is working!\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "User Management",
+			"description": "Endpoints for user registration, authentication, profile management, and admin user operations.",
+			"item": [
+				{
+					"name": "POST /user/register/ - Register User",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"user@example.com\", //req\n    \"first_name\": \"John\", //req\n    \"last_name\": \"Doe\", //req\n    \"address\": \"123 Main St\", //optional\n    \"payment_info\": \"card_123456\", //optional\n    \"password\": \"password123\", //req\n    \"password2\": \"password123\" //req - must match password\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/register/",
+							"host": ["{{baseUrl}}"],
+							"path": ["user", "register", ""]
+						},
+						"description": "Register a new user account. Returns JWT tokens upon successful registration.\n\n---\n\n**Required Fields:**\n\n- `email`: User email address\n- `first_name`: User's first name\n- `last_name`: User's last name\n- `password`: User password\n- `password2`: Password confirmation (must match password)\n\n**Optional Fields:**\n\n- `address`: User address\n- `payment_info`: Payment information\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X POST {{baseUrl}}/user/register/ \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"email\": \"user@example.com\",\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"password\": \"password123\",\n    \"password2\": \"password123\"\n  }'\n```\n\n---"
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"user@example.com\",\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"password\": \"password123\",\n    \"password2\": \"password123\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/register/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "register", ""]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"token\": {\n        \"refresh\": \"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTcwNTMxMjAwMCwiaWF0IjoxNzA1MjI1NjAwLCJqdGkiOiIxMjM0NTY3ODkwIiwidXNlcl9pZCI6MX0.example_refresh_token\",\n        \"access\": \"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzA1MjI2MjAwLCJpYXQiOjE3MDUyMjU2MDAsImp0aSI6IjEyMzQ1Njc4OTAiLCJ1c2VyX2lkIjoxfQ.example_access_token\"\n    },\n    \"msg\": \"register successfull\"\n}"
+						},
+						{
+							"name": "Validation Error - Password Mismatch",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"user@example.com\",\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"password\": \"password123\",\n    \"password2\": \"different_password\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/register/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "register", ""]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"password2\": [\n        \"password dont match\"\n    ]\n}"
+						},
+						{
+							"name": "Validation Error - Email Already Exists",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"existing@example.com\",\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"password\": \"password123\",\n    \"password2\": \"password123\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/register/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "register", ""]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"email\": [\n        \"user with this email already exists.\"\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "POST /user/login/ - Login User",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"user@example.com\", //req\n    \"password\": \"password123\" //req\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/login/",
+							"host": ["{{baseUrl}}"],
+							"path": ["user", "login", ""]
+						},
+						"description": "Authenticate a user and receive JWT tokens. Store the `access` and `refresh` tokens in collection variables.\n\n---\n\n**Required Fields:**\n\n- `email`: User email address\n- `password`: User password\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X POST {{baseUrl}}/user/login/ \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"email\": \"user@example.com\",\n    \"password\": \"password123\"\n  }'\n```\n\n---\n\n**Note:** After successful login, update the collection variables:\n\n- Set `access` to the `token.access` value\n- Set `refresh` to the `token.refresh` value\n\n---"
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"password123\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/login/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "login", ""]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"is_admin\": false,\n    \"token\": {\n        \"refresh\": \"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTcwNTMxMjAwMCwiaWF0IjoxNzA1MjI1NjAwLCJqdGkiOiIxMjM0NTY3ODkwIiwidXNlcl9pZCI6MX0.example_refresh_token\",\n        \"access\": \"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzA1MjI2MjAwLCJpYXQiOjE3MDUyMjU2MDAsImp0aSI6IjEyMzQ1Njc4OTAiLCJ1c2VyX2lkIjoxfQ.example_access_token\"\n    },\n    \"msg\": \"login successfull\"\n}"
+						},
+						{
+							"name": "Invalid Credentials",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"wrongpassword\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/login/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "login", ""]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"invalid username or password\"\n}"
+						}
+					]
+				},
+				{
+					"name": "GET /user/profile/ - Get User Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/user/profile/",
+							"host": ["{{baseUrl}}"],
+							"path": ["user", "profile", ""]
+						},
+						"description": "Retrieve the authenticated user's profile information.\n\n---\n\n**Authentication:** Required - Bearer Token\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X GET {{baseUrl}}/user/profile/ \\\n  -H \"Authorization: Bearer {{access}}\"\n```\n\n---"
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/user/profile/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "profile", ""]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 1,\n    \"email\": \"user@example.com\",\n    \"is_admin\": false,\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"image\": null,\n    \"address\": \"123 Main St\",\n    \"payment_info\": \"card_123456\"\n}"
+						},
+						{
+							"name": "Unauthorized - Missing Token",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/user/profile/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "profile", ""]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"detail\": \"Authentication credentials were not provided.\"\n}"
+						}
+					]
+				},
+				{
+					"name": "PATCH /user/changepassword/ - Change Password",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"old_password\": \"oldpassword123\", //req\n    \"new_password\": \"newpassword123\", //req\n    \"confirm_password\": \"newpassword123\" //req - must match new_password\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/changepassword/",
+							"host": ["{{baseUrl}}"],
+							"path": ["user", "changepassword", ""]
+						},
+						"description": "Change the authenticated user's password.\n\n---\n\n**Authentication:** Required - Bearer Token\n\n---\n\n**Required Fields:**\n\n- `old_password`: Current password\n- `new_password`: New password\n- `confirm_password`: Password confirmation (must match new_password)\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X PATCH {{baseUrl}}/user/changepassword/ \\\n  -H \"Authorization: Bearer {{access}}\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"old_password\": \"oldpassword123\",\n    \"new_password\": \"newpassword123\",\n    \"confirm_password\": \"newpassword123\"\n  }'\n```\n\n---"
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"old_password\": \"oldpassword123\",\n    \"new_password\": \"newpassword123\",\n    \"confirm_password\": \"newpassword123\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/changepassword/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "changepassword", ""]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"Password changed successfully\"\n}"
+						},
+						{
+							"name": "Validation Error - Incorrect Old Password",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"old_password\": \"wrongpassword\",\n    \"new_password\": \"newpassword123\",\n    \"confirm_password\": \"newpassword123\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/changepassword/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "changepassword", ""]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"old_password\": [\n        \"Old password is incorrect.\"\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "POST /user/logout/ - Logout User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh_token\": \"{{refresh}}\" //req - refresh token to blacklist\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/logout/",
+							"host": ["{{baseUrl}}"],
+							"path": ["user", "logout", ""]
+						},
+						"description": "Logout the authenticated user by blacklisting the refresh token.\n\n---\n\n**Authentication:** Required - Bearer Token\n\n---\n\n**Required Fields:**\n\n- `refresh_token`: The refresh token to blacklist\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X POST {{baseUrl}}/user/logout/ \\\n  -H \"Authorization: Bearer {{access}}\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"refresh_token\": \"{{refresh}}\"\n  }'\n```\n\n---"
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"refresh_token\": \"{{refresh}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/logout/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "logout", ""]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"Logged out successfully\"\n}"
+						},
+						{
+							"name": "Invalid Token",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"refresh_token\": \"invalid_token\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/logout/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "logout", ""]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"Invalid token\"\n}"
+						}
+					]
+				},
+				{
+					"name": "GET /user/updateprofile/ - Get Profile for Update",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/user/updateprofile/",
+							"host": ["{{baseUrl}}"],
+							"path": ["user", "updateprofile", ""]
+						},
+						"description": "Get the authenticated user's profile data for updating.\n\n---\n\n**Authentication:** Required - Bearer Token\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X GET {{baseUrl}}/user/updateprofile/ \\\n  -H \"Authorization: Bearer {{access}}\"\n```\n\n---"
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/user/updateprofile/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "updateprofile", ""]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"email\": \"user@example.com\",\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"image\": null,\n    \"address\": \"123 Main St\",\n    \"payment_info\": \"card_123456\"\n}"
+						}
+					]
+				},
+				{
+					"name": "PUT /user/updateprofile/ - Update Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"updated@example.com\", //optional\n    \"first_name\": \"Updated\", //optional\n    \"last_name\": \"Name\", //optional\n    \"address\": \"456 Updated St\", //optional\n    \"payment_info\": \"updated_card\" //optional\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/updateprofile/",
+							"host": ["{{baseUrl}}"],
+							"path": ["user", "updateprofile", ""]
+						},
+						"description": "Update the authenticated user's profile information. All fields are optional.\n\n---\n\n**Authentication:** Required - Bearer Token\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X PUT {{baseUrl}}/user/updateprofile/ \\\n  -H \"Authorization: Bearer {{access}}\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"first_name\": \"Updated\",\n    \"last_name\": \"Name\",\n    \"address\": \"456 Updated St\"\n  }'\n```\n\n---"
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"updated@example.com\",\n    \"first_name\": \"Updated\",\n    \"last_name\": \"Name\",\n    \"address\": \"456 Updated St\",\n    \"payment_info\": \"updated_card\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/updateprofile/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "updateprofile", ""]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": [\n        \"first_name updated successfully\",\n        \"last_name updated successfully\",\n        \"address updated successfully\",\n        \"payment_info updated successfully\"\n    ]\n}"
+						},
+						{
+							"name": "No Changes Made",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/updateprofile/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "updateprofile", ""]
+								}
+							},
+							"status": "Not Acceptable",
+							"code": 406,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"No changes made\"\n}"
+						}
+					]
+				},
+				{
+					"name": "PATCH /user/updateprofile/ - Partial Update Profile",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"first_name\": \"Patched\" //optional - only include fields to update\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/updateprofile/",
+							"host": ["{{baseUrl}}"],
+							"path": ["user", "updateprofile", ""]
+						},
+						"description": "Partially update the authenticated user's profile. Only include fields that need to be updated.\n\n---\n\n**Authentication:** Required - Bearer Token\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X PATCH {{baseUrl}}/user/updateprofile/ \\\n  -H \"Authorization: Bearer {{access}}\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"first_name\": \"Patched\"\n  }'\n```\n\n---"
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"first_name\": \"Patched\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/updateprofile/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "updateprofile", ""]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"Profile updated successfully\"\n}"
+						}
+					]
+				},
+				{
+					"name": "DELETE /user/deleteaccount/ - Delete Account",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/user/deleteaccount/",
+							"host": ["{{baseUrl}}"],
+							"path": ["user", "deleteaccount", ""]
+						},
+						"description": "Delete the authenticated user's account permanently.\n\n---\n\n**Authentication:** Required - Bearer Token\n\n**Warning:** This action cannot be undone.\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X DELETE {{baseUrl}}/user/deleteaccount/ \\\n  -H \"Authorization: Bearer {{access}}\"\n```\n\n---"
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/user/deleteaccount/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "deleteaccount", ""]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"Account deleted successfully\"\n}"
+						}
+					]
+				},
+				{
+					"name": "POST /user/sendrestpasswordemail/ - Send Reset Password Email",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"user@example.com\" //req\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/sendrestpasswordemail/",
+							"host": ["{{baseUrl}}"],
+							"path": ["user", "sendrestpasswordemail", ""]
+						},
+						"description": "Send a password reset email to the specified email address.\n\n---\n\n**Required Fields:**\n\n- `email`: User email address\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X POST {{baseUrl}}/user/sendrestpasswordemail/ \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"email\": \"user@example.com\"\n  }'\n```\n\n---"
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"user@example.com\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/sendrestpasswordemail/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "sendrestpasswordemail", ""]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"password resert link was send .please check your email\"\n}"
+						},
+						{
+							"name": "User Not Found",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"nonexistent@example.com\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/sendrestpasswordemail/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "sendrestpasswordemail", ""]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"email\": [\n        \"User not found\"\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "POST /user/resetpassword/{uid}/{token}/ - Reset Password",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"password\": \"newpassword123\", //req\n    \"confirm_password\": \"newpassword123\" //req - must match password\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/resetpassword/MQ/abc123def456/",
+							"host": ["{{baseUrl}}"],
+							"path": ["user", "resetpassword", ":uid", ":token", ""],
+							"variable": [
+								{
+									"key": "uid",
+									"value": "MQ",
+									"description": "User ID encoded in base64"
+								},
+								{
+									"key": "token",
+									"value": "abc123def456",
+									"description": "Password reset token from email"
+								}
+							]
+						},
+						"description": "Reset the user's password using the reset token from the email.\n\n---\n\n**Path Parameters:**\n\n- `uid`: User ID (base64 encoded)\n- `token`: Password reset token from email\n\n---\n\n**Required Fields:**\n\n- `password`: New password\n- `confirm_password`: Password confirmation (must match password)\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X POST {{baseUrl}}/user/resetpassword/MQ/abc123def456/ \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"password\": \"newpassword123\",\n    \"confirm_password\": \"newpassword123\"\n  }'\n```\n\n---"
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"password\": \"newpassword123\",\n    \"confirm_password\": \"newpassword123\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/resetpassword/MQ/abc123def456/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "resetpassword", "MQ", "abc123def456", ""]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success_message\": \"Password has been reset successfully. go to login page\"\n}"
+						},
+						{
+							"name": "Expired Link",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"password\": \"newpassword123\",\n    \"confirm_password\": \"newpassword123\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/resetpassword/MQ/expired_token/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "resetpassword", "MQ", "expired_token", ""]
+								}
+							},
+							"status": "Request Timeout",
+							"code": 408,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"error_message\": \"Expired link of Rest Password \\n please go to forget password page.\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Admin Endpoints",
+					"description": "Admin-only endpoints for user management",
+					"item": [
+						{
+							"name": "POST /user/createadmin/ - Create Admin",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"superadmin@example.com\", //req\n    \"first_name\": \"Super\", //req\n    \"last_name\": \"Admin\", //req\n    \"password\": \"superadmin123\", //req\n    \"password2\": \"superadmin123\" //req - must match password\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/createadmin/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "createadmin", ""]
+								},
+								"description": "Create the first admin user (used for initial setup). No authentication required.\n\n---\n\n**Required Fields:**\n\n- `email`: Admin email address\n- `first_name`: Admin's first name\n- `last_name`: Admin's last name\n- `password`: Admin password\n- `password2`: Password confirmation (must match password)\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X POST {{baseUrl}}/user/createadmin/ \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"email\": \"superadmin@example.com\",\n    \"first_name\": \"Super\",\n    \"last_name\": \"Admin\",\n    \"password\": \"superadmin123\",\n    \"password2\": \"superadmin123\"\n  }'\n```\n\n---"
+							},
+							"response": [
+								{
+									"name": "Success Response",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"email\": \"superadmin@example.com\",\n    \"first_name\": \"Super\",\n    \"last_name\": \"Admin\",\n    \"password\": \"superadmin123\",\n    \"password2\": \"superadmin123\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/user/createadmin/",
+											"host": ["{{baseUrl}}"],
+											"path": ["user", "createadmin", ""]
+										}
+									},
+									"status": "Created",
+									"code": 201,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"email\": \"superadmin@example.com\",\n    \"first_name\": \"Super\",\n    \"last_name\": \"Admin\",\n    \"image\": null,\n    \"is_superuser\": true,\n    \"is_staff\": true,\n    \"is_admin\": true\n}"
+								}
+							]
+						},
+						{
+							"name": "POST /user/addadmin/ - Add Admin",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_access}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"first_name\": \"Admin\", //req\n    \"last_name\": \"User\", //req\n    \"email\": \"admin@example.com\", //req\n    \"address\": \"456 Admin St\", //optional\n    \"payment_info\": \"admin_card\", //optional\n    \"password\": \"adminpass123\" //req\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/addadmin/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "addadmin", ""]
+								},
+								"description": "Create a new admin user. Requires admin authentication.\n\n---\n\n**Authentication:** Required - Admin Bearer Token\n\n---\n\n**Required Fields:**\n\n- `first_name`: Admin's first name\n- `last_name`: Admin's last name\n- `email`: Admin email address\n- `password`: Admin password\n\n**Optional Fields:**\n\n- `address`: Admin address\n- `payment_info`: Payment information\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X POST {{baseUrl}}/user/addadmin/ \\\n  -H \"Authorization: Bearer {{admin_access}}\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"first_name\": \"Admin\",\n    \"last_name\": \"User\",\n    \"email\": \"admin@example.com\",\n    \"password\": \"adminpass123\"\n  }'\n```\n\n---"
+							},
+							"response": [
+								{
+									"name": "Success Response",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer {{admin_access}}"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"first_name\": \"Admin\",\n    \"last_name\": \"User\",\n    \"email\": \"admin@example.com\",\n    \"address\": \"456 Admin St\",\n    \"payment_info\": \"admin_card\",\n    \"password\": \"adminpass123\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/user/addadmin/",
+											"host": ["{{baseUrl}}"],
+											"path": ["user", "addadmin", ""]
+										}
+									},
+									"status": "Created",
+									"code": 201,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"id\": 2,\n    \"first_name\": \"Admin\",\n    \"last_name\": \"User\",\n    \"is_admin\": true,\n    \"email\": \"admin@example.com\",\n    \"address\": \"456 Admin St\",\n    \"payment_info\": \"admin_card\"\n}"
+								},
+								{
+									"name": "Access Denied",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access}}"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"first_name\": \"Admin\",\n    \"last_name\": \"User\",\n    \"email\": \"admin@example.com\",\n    \"password\": \"adminpass123\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/user/addadmin/",
+											"host": ["{{baseUrl}}"],
+											"path": ["user", "addadmin", ""]
+										}
+									},
+									"status": "Forbidden",
+									"code": 403,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"Don't have access\"\n}"
+								}
+							]
+						},
+						{
+							"name": "POST /user/adduser/ - Add User",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_access}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"first_name\": \"New\", //req\n    \"last_name\": \"User\", //req\n    \"email\": \"newuser@example.com\", //req\n    \"password\": \"newuserpass123\" //req\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/adduser/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "adduser", ""]
+								},
+								"description": "Create a new regular user. Requires admin authentication.\n\n---\n\n**Authentication:** Required - Admin Bearer Token\n\n---\n\n**Required Fields:**\n\n- `first_name`: User's first name\n- `last_name`: User's last name\n- `email`: User email address\n- `password`: User password\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X POST {{baseUrl}}/user/adduser/ \\\n  -H \"Authorization: Bearer {{admin_access}}\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"first_name\": \"New\",\n    \"last_name\": \"User\",\n    \"email\": \"newuser@example.com\",\n    \"password\": \"newuserpass123\"\n  }'\n```\n\n---"
+							},
+							"response": [
+								{
+									"name": "Success Response",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer {{admin_access}}"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"first_name\": \"New\",\n    \"last_name\": \"User\",\n    \"email\": \"newuser@example.com\",\n    \"password\": \"newuserpass123\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/user/adduser/",
+											"host": ["{{baseUrl}}"],
+											"path": ["user", "adduser", ""]
+										}
+									},
+									"status": "Created",
+									"code": 201,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"id\": 3,\n    \"first_name\": \"New\",\n    \"last_name\": \"User\",\n    \"is_admin\": false,\n    \"email\": \"newuser@example.com\"\n}"
+								}
+							]
+						},
+						{
+							"name": "GET /user/listusers/ - List Users",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_access}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/user/listusers/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "listusers", ""]
+								},
+								"description": "List all regular users. Requires admin authentication.\n\n---\n\n**Authentication:** Required - Admin Bearer Token\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X GET {{baseUrl}}/user/listusers/ \\\n  -H \"Authorization: Bearer {{admin_access}}\"\n```\n\n---"
+							},
+							"response": [
+								{
+									"name": "Success Response",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer {{admin_access}}"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/user/listusers/",
+											"host": ["{{baseUrl}}"],
+											"path": ["user", "listusers", ""]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "[\n    {\n        \"id\": 1,\n        \"email\": \"user@example.com\",\n        \"first_name\": \"John\",\n        \"last_name\": \"Doe\",\n        \"image\": null,\n        \"is_admin\": false\n    },\n    {\n        \"id\": 3,\n        \"email\": \"newuser@example.com\",\n        \"first_name\": \"New\",\n        \"last_name\": \"User\",\n        \"image\": null,\n        \"is_admin\": false\n    }\n]"
+								}
+							]
+						},
+						{
+							"name": "GET /user/listadmins/ - List Admins",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_access}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/user/listadmins/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "listadmins", ""]
+								},
+								"description": "List all admin users. Requires admin authentication.\n\n---\n\n**Authentication:** Required - Admin Bearer Token\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X GET {{baseUrl}}/user/listadmins/ \\\n  -H \"Authorization: Bearer {{admin_access}}\"\n```\n\n---"
+							},
+							"response": [
+								{
+									"name": "Success Response",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer {{admin_access}}"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/user/listadmins/",
+											"host": ["{{baseUrl}}"],
+											"path": ["user", "listadmins", ""]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "[\n    {\n        \"id\": 2,\n        \"email\": \"admin@example.com\",\n        \"first_name\": \"Admin\",\n        \"last_name\": \"User\",\n        \"image\": null,\n        \"is_admin\": true\n    }\n]"
+								}
+							]
+						},
+						{
+							"name": "GET /user/retrieveuser/{id}/ - Retrieve User",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_access}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/user/retrieveuser/1/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "retrieveuser", ":id", ""],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1",
+											"description": "User ID"
+										}
+									]
+								},
+								"description": "Retrieve a specific user's information by ID. Requires admin authentication.\n\n---\n\n**Authentication:** Required - Admin Bearer Token\n\n---\n\n**Path Parameters:**\n\n- `id`: User ID\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X GET {{baseUrl}}/user/retrieveuser/1/ \\\n  -H \"Authorization: Bearer {{admin_access}}\"\n```\n\n---"
+							},
+							"response": [
+								{
+									"name": "Success Response",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer {{admin_access}}"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/user/retrieveuser/1/",
+											"host": ["{{baseUrl}}"],
+											"path": ["user", "retrieveuser", "1", ""]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"id\": 1,\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"is_admin\": false,\n    \"email\": \"user@example.com\",\n    \"password\": \"pbkdf2_sha256$260000$example_hash$example_salt\"\n}"
+								},
+								{
+									"name": "User Not Found",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer {{admin_access}}"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/user/retrieveuser/999/",
+											"host": ["{{baseUrl}}"],
+											"path": ["user", "retrieveuser", "999", ""]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"user not found\"\n}"
+								}
+							]
+						},
+						{
+							"name": "DELETE /user/deleteuser/{id}/ - Delete User",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_access}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/user/deleteuser/3/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "deleteuser", ":id", ""],
+									"variable": [
+										{
+											"key": "id",
+											"value": "3",
+											"description": "User ID"
+										}
+									]
+								},
+								"description": "Delete a user by ID. Requires admin authentication.\n\n---\n\n**Authentication:** Required - Admin Bearer Token\n\n---\n\n**Path Parameters:**\n\n- `id`: User ID\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X DELETE {{baseUrl}}/user/deleteuser/3/ \\\n  -H \"Authorization: Bearer {{admin_access}}\"\n```\n\n---"
+							},
+							"response": [
+								{
+									"name": "Success Response",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer {{admin_access}}"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/user/deleteuser/3/",
+											"host": ["{{baseUrl}}"],
+											"path": ["user", "deleteuser", "3", ""]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"deleted succesfully\"\n}"
+								},
+								{
+									"name": "User Not Found",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer {{admin_access}}"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/user/deleteuser/999/",
+											"host": ["{{baseUrl}}"],
+											"path": ["user", "deleteuser", "999", ""]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"user not found\"\n}"
+								}
+							]
+						},
+						{
+							"name": "PATCH /user/updateuser/{id}/ - Update User",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_access}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"first_name\": \"Updated\", //optional\n    \"last_name\": \"Name\" //optional\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/updateuser/1/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "updateuser", ":id", ""],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1",
+											"description": "User ID"
+										}
+									]
+								},
+								"description": "Update a user's information by ID. Requires admin authentication.\n\n---\n\n**Authentication:** Required - Admin Bearer Token\n\n---\n\n**Path Parameters:**\n\n- `id`: User ID\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X PATCH {{baseUrl}}/user/updateuser/1/ \\\n  -H \"Authorization: Bearer {{admin_access}}\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"first_name\": \"Updated\",\n    \"last_name\": \"Name\"\n  }'\n```\n\n---"
+							},
+							"response": [
+								{
+									"name": "Success Response",
+									"originalRequest": {
+										"method": "PATCH",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer {{admin_access}}"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"first_name\": \"Updated\",\n    \"last_name\": \"Name\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/user/updateuser/1/",
+											"host": ["{{baseUrl}}"],
+											"path": ["user", "updateuser", "1", ""]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"updated succesfully\"\n}"
+								}
+							]
+						},
+						{
+							"name": "GET /user/searchuser/{first_name}/ - Search User",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_access}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/user/searchuser/John/",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "searchuser", ":first_name", ""],
+									"variable": [
+										{
+											"key": "first_name",
+											"value": "John",
+											"description": "User's first name to search"
+										}
+									]
+								},
+								"description": "Search for users by first name. Requires admin authentication.\n\n---\n\n**Authentication:** Required - Admin Bearer Token\n\n---\n\n**Path Parameters:**\n\n- `first_name`: User's first name to search\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X GET {{baseUrl}}/user/searchuser/John/ \\\n  -H \"Authorization: Bearer {{admin_access}}\"\n```\n\n---"
+							},
+							"response": [
+								{
+									"name": "Success Response",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer {{admin_access}}"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/user/searchuser/John/",
+											"host": ["{{baseUrl}}"],
+											"path": ["user", "searchuser", "John", ""]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "[\n    {\n        \"id\": 1,\n        \"first_name\": \"John\",\n        \"last_name\": \"Doe\",\n        \"is_admin\": false,\n        \"email\": \"user@example.com\",\n        \"password\": \"pbkdf2_sha256$260000$example_hash$example_salt\"\n    }\n]"
+								},
+								{
+									"name": "User Not Found",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer {{admin_access}}"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/user/searchuser/Nonexistent/",
+											"host": ["{{baseUrl}}"],
+											"path": ["user", "searchuser", "Nonexistent", ""]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"user not found\"\n}"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Book Management",
+			"description": "Endpoints for managing books, customizing books with AI, and retrieving book files and covers.",
+			"item": [
+				{
+					"name": "POST /books/customize/ - Customize Book",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "book",
+									"value": "1",
+									"type": "text",
+									"description": "Book ID (required)"
+								},
+								{
+									"key": "child_name",
+									"value": "Alice",
+									"type": "text",
+									"description": "Child's name to replace character name (required)"
+								},
+								{
+									"key": "child_age",
+									"value": "5",
+									"type": "text",
+									"description": "Child's age (optional)"
+								},
+								{
+									"key": "child_image",
+									"type": "file",
+									"src": [],
+									"description": "Child's photo image file (required) - JPEG, PNG, WebP, BMP, or TIFF"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/books/customize/",
+							"host": ["{{baseUrl}}"],
+							"path": ["books", "customize", ""]
+						},
+						"description": "Customize a book by replacing the main character with a child's name and image using AI processing.\n\n---\n\n**Authentication:** Required - Bearer Token\n\n---\n\n**Required Fields:**\n\n- `book`: Book ID\n- `child_name`: Child's name to replace character name\n- `child_image`: Child's photo image file (JPEG, PNG, WebP, BMP, or TIFF)\n\n**Optional Fields:**\n\n- `child_age`: Child's age\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X POST {{baseUrl}}/books/customize/ \\\n  -H \"Authorization: Bearer {{access}}\" \\\n  -F \"book=1\" \\\n  -F \"child_name=Alice\" \\\n  -F \"child_age=5\" \\\n  -F \"child_image=@/path/to/child_photo.jpg\"\n```\n\n---\n\n**Note:** This endpoint uses AI to process images and may take some time to complete.\n\n---"
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "book",
+											"value": "1",
+											"type": "text"
+										},
+										{
+											"key": "child_name",
+											"value": "Alice",
+											"type": "text"
+										},
+										{
+											"key": "child_age",
+											"value": "5",
+											"type": "text"
+										},
+										{
+											"key": "child_image",
+											"type": "file",
+											"src": []
+										}
+									]
+								},
+								"url": {
+									"raw": "{{baseUrl}}/books/customize/",
+									"host": ["{{baseUrl}}"],
+									"path": ["books", "customize", ""]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"message\": \"Book customized successfully!\",\n    \"customization_id\": 1,\n    \"book_id\": 1,\n    \"book_title\": \"Sample Book\",\n    \"child_name\": \"Alice\",\n    \"images_processed\": 5,\n    \"total_images\": 5,\n    \"character_replacements\": 3,\n    \"character_replaced\": true,\n    \"original_character_name\": \"Tommy\",\n    \"custom_book_url\": \"{{baseUrl}}/books/customizations/1/file/\",\n    \"child_image_url\": \"{{baseUrl}}/books/customizations/1/child-image/\",\n    \"ai_processing_used\": true,\n    \"created_at\": \"2024-01-15T10:30:00Z\"\n}"
+						},
+						{
+							"name": "Validation Error - Missing Required Fields",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "book",
+											"value": "1",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{baseUrl}}/books/customize/",
+									"host": ["{{baseUrl}}"],
+									"path": ["books", "customize", ""]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"error\": \"book_id, child_name and child_image are required.\"\n}"
+						},
+						{
+							"name": "Book Not Found",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "book",
+											"value": "999",
+											"type": "text"
+										},
+										{
+											"key": "child_name",
+											"value": "Alice",
+											"type": "text"
+										},
+										{
+											"key": "child_image",
+											"type": "file",
+											"src": []
+										}
+									]
+								},
+								"url": {
+									"raw": "{{baseUrl}}/books/customize/",
+									"host": ["{{baseUrl}}"],
+									"path": ["books", "customize", ""]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"error\": \"Book not found\"\n}"
+						}
+					]
+				},
+				{
+					"name": "GET /books/listcustomizations/ - List Customizations",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/books/listcustomizations/",
+							"host": ["{{baseUrl}}"],
+							"path": ["books", "listcustomizations", ""]
+						},
+						"description": "List all customizations for the authenticated user.\n\n---\n\n**Authentication:** Required - Bearer Token\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X GET {{baseUrl}}/books/listcustomizations/ \\\n  -H \"Authorization: Bearer {{access}}\"\n```\n\n---"
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/books/listcustomizations/",
+									"host": ["{{baseUrl}}"],
+									"path": ["books", "listcustomizations", ""]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"count\": 1,\n    \"customizations\": [\n        {\n            \"id\": 1,\n            \"book\": {\n                \"id\": 1,\n                \"title\": \"Sample Book\",\n                \"char_name\": \"Tommy\",\n                \"price\": 10.99,\n                \"category\": \"Adventure\",\n                \"age\": \"5-7\",\n                \"gender\": \"unisex\",\n                \"rate\": 4.5,\n                \"description\": \"A fun adventure book\",\n                \"book_file\": \"{{baseUrl}}/books/bookfile/1/\",\n                \"cover_image\": \"{{baseUrl}}/books/cover/1/\",\n                \"book_file_type\": \"application/pdf\",\n                \"cover_image_type\": \"image/jpeg\"\n            },\n            \"child_name\": \"Alice\",\n            \"child_age\": \"5\",\n            \"custom_book\": \"<binary_data>\",\n            \"custom_book_type\": \"application/pdf\",\n            \"child_image\": \"<binary_data>\",\n            \"child_image_type\": \"image/jpeg\",\n            \"user\": 1,\n            \"created_at\": \"2024-01-15T10:30:00Z\"\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "GET /books/customizations/{pk}/ - Get Customization",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/books/customizations/1/",
+							"host": ["{{baseUrl}}"],
+							"path": ["books", "customizations", ":pk", ""],
+							"variable": [
+								{
+									"key": "pk",
+									"value": "1",
+									"description": "Customization ID"
+								}
+							]
+						},
+						"description": "Retrieve a specific customization by ID.\n\n---\n\n**Authentication:** Required - Bearer Token\n\n---\n\n**Path Parameters:**\n\n- `pk`: Customization ID\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X GET {{baseUrl}}/books/customizations/1/ \\\n  -H \"Authorization: Bearer {{access}}\"\n```\n\n---"
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/books/customizations/1/",
+									"host": ["{{baseUrl}}"],
+									"path": ["books", "customizations", "1", ""]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"customization\": {\n        \"id\": 1,\n        \"book\": {\n            \"id\": 1,\n            \"title\": \"Sample Book\",\n            \"char_name\": \"Tommy\",\n            \"price\": 10.99,\n            \"category\": \"Adventure\",\n            \"age\": \"5-7\",\n            \"gender\": \"unisex\",\n            \"rate\": 4.5,\n            \"description\": \"A fun adventure book\",\n            \"book_file\": \"{{baseUrl}}/books/bookfile/1/\",\n            \"cover_image\": \"{{baseUrl}}/books/cover/1/\",\n            \"book_file_type\": \"application/pdf\",\n            \"cover_image_type\": \"image/jpeg\"\n        },\n        \"child_name\": \"Alice\",\n        \"child_age\": \"5\",\n        \"custom_book\": \"<binary_data>\",\n        \"custom_book_type\": \"application/pdf\",\n        \"child_image\": \"<binary_data>\",\n        \"child_image_type\": \"image/jpeg\",\n        \"user\": 1,\n        \"created_at\": \"2024-01-15T10:30:00Z\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "DELETE /books/customizations/{pk}/delete/ - Delete Customization",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/books/customizations/1/delete/",
+							"host": ["{{baseUrl}}"],
+							"path": ["books", "customizations", ":pk", "delete", ""],
+							"variable": [
+								{
+									"key": "pk",
+									"value": "1",
+									"description": "Customization ID"
+								}
+							]
+						},
+						"description": "Delete a customization by ID.\n\n---\n\n**Authentication:** Required - Bearer Token\n\n---\n\n**Path Parameters:**\n\n- `pk`: Customization ID\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X DELETE {{baseUrl}}/books/customizations/1/delete/ \\\n  -H \"Authorization: Bearer {{access}}\"\n```\n\n---"
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/books/customizations/1/delete/",
+									"host": ["{{baseUrl}}"],
+									"path": ["books", "customizations", "1", "delete", ""]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"message\": \"Customization for 'Alice' of 'Sample Book' deleted successfully\"\n}"
+						}
+					]
+				},
+				{
+					"name": "GET /books/customizations/{pk}/file/ - Get Custom Book File",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/books/customizations/1/file/",
+							"host": ["{{baseUrl}}"],
+							"path": ["books", "customizations", ":pk", "file", ""],
+							"variable": [
+								{
+									"key": "pk",
+									"value": "1",
+									"description": "Customization ID"
+								}
+							]
+						},
+						"description": "Download the customized book PDF file.\n\n---\n\n**Authentication:** Required - Bearer Token\n\n---\n\n**Path Parameters:**\n\n- `pk`: Customization ID\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X GET {{baseUrl}}/books/customizations/1/file/ \\\n  -H \"Authorization: Bearer {{access}}\" \\\n  -o customized_book.pdf\n```\n\n---"
+					},
+					"response": [
+						{
+							"name": "Success Response - PDF File",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/books/customizations/1/file/",
+									"host": ["{{baseUrl}}"],
+									"path": ["books", "customizations", "1", "file", ""]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/pdf"
+								},
+								{
+									"key": "Content-Disposition",
+									"value": "attachment; filename=\"Alice_Sample_Book.pdf\""
+								}
+							],
+							"cookie": [],
+							"body": "<PDF_BINARY_DATA>"
+						}
+					]
+				},
+				{
+					"name": "GET /books/customizations/{pk}/child-image/ - Get Child Image",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/books/customizations/1/child-image/",
+							"host": ["{{baseUrl}}"],
+							"path": ["books", "customizations", ":pk", "child-image", ""],
+							"variable": [
+								{
+									"key": "pk",
+									"value": "1",
+									"description": "Customization ID"
+								}
+							]
+						},
+						"description": "Download the child's image used in customization.\n\n---\n\n**Authentication:** Required - Bearer Token\n\n---\n\n**Path Parameters:**\n\n- `pk`: Customization ID\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X GET {{baseUrl}}/books/customizations/1/child-image/ \\\n  -H \"Authorization: Bearer {{access}}\" \\\n  -o child_image.jpg\n```\n\n---"
+					},
+					"response": [
+						{
+							"name": "Success Response - Image File",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/books/customizations/1/child-image/",
+									"host": ["{{baseUrl}}"],
+									"path": ["books", "customizations", "1", "child-image", ""]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "image/jpeg"
+								},
+								{
+									"key": "Content-Disposition",
+									"value": "inline; filename=\"Alice_photo.jpg\""
+								}
+							],
+							"cookie": [],
+							"body": "<IMAGE_BINARY_DATA>"
+						}
+					]
+				},
+				{
+					"name": "GET /books/books/ - List Books",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/books/books/",
+							"host": ["{{baseUrl}}"],
+							"path": ["books", "books", ""]
+						},
+						"description": "List all available books.\n\n---\n\n**Authentication:** Required - Bearer Token\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X GET {{baseUrl}}/books/books/ \\\n  -H \"Authorization: Bearer {{access}}\"\n```\n\n---"
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/books/books/",
+									"host": ["{{baseUrl}}"],
+									"path": ["books", "books", ""]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"id\": 1,\n        \"title\": \"Sample Book\",\n        \"char_name\": \"Tommy\",\n        \"price\": 10.99,\n        \"category\": \"Adventure\",\n        \"age\": \"5-7\",\n        \"gender\": \"unisex\",\n        \"rate\": 4.5,\n        \"description\": \"A fun adventure book\",\n        \"book_file\": \"{{baseUrl}}/books/bookfile/1/\",\n        \"cover_image\": \"{{baseUrl}}/books/cover/1/\",\n        \"book_file_type\": \"application/pdf\",\n        \"cover_image_type\": \"image/jpeg\"\n    },\n    {\n        \"id\": 2,\n        \"title\": \"Another Adventure\",\n        \"char_name\": \"Luna\",\n        \"price\": 12.99,\n        \"category\": \"Fantasy\",\n        \"age\": \"6-8\",\n        \"gender\": \"girl\",\n        \"rate\": 4.8,\n        \"description\": \"A magical fantasy story\",\n        \"book_file\": \"{{baseUrl}}/books/bookfile/2/\",\n        \"cover_image\": \"{{baseUrl}}/books/cover/2/\",\n        \"book_file_type\": \"application/pdf\",\n        \"cover_image_type\": \"image/jpeg\"\n    }\n]"
+						}
+					]
+				},
+				{
+					"name": "GET /books/books/{pk}/ - Retrieve One Book",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/books/books/1/",
+							"host": ["{{baseUrl}}"],
+							"path": ["books", "books", ":pk", ""],
+							"variable": [
+								{
+									"key": "pk",
+									"value": "1",
+									"description": "Book ID"
+								}
+							]
+						},
+						"description": "Retrieve a specific book by ID.\n\n---\n\n**Authentication:** Required - Bearer Token\n\n---\n\n**Path Parameters:**\n\n- `pk`: Book ID\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X GET {{baseUrl}}/books/books/1/ \\\n  -H \"Authorization: Bearer {{access}}\"\n```\n\n---"
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/books/books/1/",
+									"host": ["{{baseUrl}}"],
+									"path": ["books", "books", "1", ""]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 1,\n    \"title\": \"Sample Book\",\n    \"char_name\": \"Tommy\",\n    \"price\": 10.99,\n    \"category\": \"Adventure\",\n    \"age\": \"5-7\",\n    \"gender\": \"unisex\",\n    \"rate\": 4.5,\n    \"description\": \"A fun adventure book\",\n    \"book_file\": \"{{baseUrl}}/books/bookfile/1/\",\n    \"cover_image\": \"{{baseUrl}}/books/cover/1/\",\n    \"book_file_type\": \"application/pdf\",\n    \"cover_image_type\": \"image/jpeg\"\n}"
+						},
+						{
+							"name": "Not Found",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/books/books/999/",
+									"host": ["{{baseUrl}}"],
+									"path": ["books", "books", "999", ""]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"Not found\"\n}"
+						}
+					]
+				},
+				{
+					"name": "POST /books/addbook/ - Add Book",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "New Book Title",
+									"type": "text",
+									"description": "Book title (required)"
+								},
+								{
+									"key": "char_name",
+									"value": "Character Name",
+									"type": "text",
+									"description": "Main character name (required)"
+								},
+								{
+									"key": "price",
+									"value": "15.99",
+									"type": "text",
+									"description": "Book price (required)"
+								},
+								{
+									"key": "category",
+									"value": "Fiction",
+									"type": "text",
+									"description": "Book category (required)"
+								},
+								{
+									"key": "age",
+									"value": "6-8",
+									"type": "text",
+									"description": "Target age range (required)"
+								},
+								{
+									"key": "gender",
+									"value": "unisex",
+									"type": "text",
+									"description": "Target gender: boy, girl, or unisex (required)"
+								},
+								{
+									"key": "rate",
+									"value": "4.8",
+									"type": "text",
+									"description": "Book rating (required)"
+								},
+								{
+									"key": "description",
+									"value": "A wonderful new book",
+									"type": "text",
+									"description": "Book description (required)"
+								},
+								{
+									"key": "book_file",
+									"type": "file",
+									"src": [],
+									"description": "Book PDF file (required)"
+								},
+								{
+									"key": "cover_image",
+									"type": "file",
+									"src": [],
+									"description": "Book cover image (required) - JPEG, PNG, WebP"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/books/addbook/",
+							"host": ["{{baseUrl}}"],
+							"path": ["books", "addbook", ""]
+						},
+						"description": "Add a new book to the catalog.\n\n---\n\n**Authentication:** Required - Bearer Token\n\n---\n\n**Required Fields:**\n\n- `title`: Book title\n- `char_name`: Main character name\n- `price`: Book price\n- `category`: Book category\n- `age`: Target age range\n- `gender`: Target gender (boy, girl, or unisex)\n- `rate`: Book rating\n- `description`: Book description\n- `book_file`: Book PDF file\n- `cover_image`: Book cover image (JPEG, PNG, WebP)\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X POST {{baseUrl}}/books/addbook/ \\\n  -H \"Authorization: Bearer {{access}}\" \\\n  -F \"title=New Book Title\" \\\n  -F \"char_name=Character Name\" \\\n  -F \"price=15.99\" \\\n  -F \"category=Fiction\" \\\n  -F \"age=6-8\" \\\n  -F \"gender=unisex\" \\\n  -F \"rate=4.8\" \\\n  -F \"description=A wonderful new book\" \\\n  -F \"book_file=@/path/to/book.pdf\" \\\n  -F \"cover_image=@/path/to/cover.jpg\"\n```\n\n---"
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "title",
+											"value": "New Book Title",
+											"type": "text"
+										},
+										{
+											"key": "char_name",
+											"value": "Character Name",
+											"type": "text"
+										},
+										{
+											"key": "price",
+											"value": "15.99",
+											"type": "text"
+										},
+										{
+											"key": "category",
+											"value": "Fiction",
+											"type": "text"
+										},
+										{
+											"key": "age",
+											"value": "6-8",
+											"type": "text"
+										},
+										{
+											"key": "gender",
+											"value": "unisex",
+											"type": "text"
+										},
+										{
+											"key": "rate",
+											"value": "4.8",
+											"type": "text"
+										},
+										{
+											"key": "description",
+											"value": "A wonderful new book",
+											"type": "text"
+										},
+										{
+											"key": "book_file",
+											"type": "file",
+											"src": []
+										},
+										{
+											"key": "cover_image",
+											"type": "file",
+											"src": []
+										}
+									]
+								},
+								"url": {
+									"raw": "{{baseUrl}}/books/addbook/",
+									"host": ["{{baseUrl}}"],
+									"path": ["books", "addbook", ""]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"Book added successfully\",\n    \"data\": {\n        \"id\": 2,\n        \"title\": \"New Book Title\",\n        \"char_name\": \"Character Name\",\n        \"price\": 15.99,\n        \"category\": \"Fiction\",\n        \"age\": \"6-8\",\n        \"gender\": \"unisex\",\n        \"rate\": 4.8,\n        \"description\": \"A wonderful new book\",\n        \"book_file\": \"{{baseUrl}}/books/bookfile/2/\",\n        \"cover_image\": \"{{baseUrl}}/books/cover/2/\",\n        \"book_file_type\": \"application/pdf\",\n        \"cover_image_type\": \"image/jpeg\"\n    },\n    \"book_file_url\": \"{{baseUrl}}/books/bookfile/2/\",\n    \"cover_image_url\": \"{{baseUrl}}/books/cover/2/\"\n}"
+						},
+						{
+							"name": "Validation Error - Missing Book File",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "title",
+											"value": "New Book Title",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{baseUrl}}/books/addbook/",
+									"host": ["{{baseUrl}}"],
+									"path": ["books", "addbook", ""]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"error\": \"Book PDF file is required\"\n}"
+						}
+					]
+				},
+				{
+					"name": "PATCH /books/update_book/{pk}/ - Update Book",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Updated Book Title\", //optional\n    \"price\": 12.99, //optional\n    \"category\": \"Adventure\", //optional\n    \"description\": \"Updated description\" //optional\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/books/update_book/1/",
+							"host": ["{{baseUrl}}"],
+							"path": ["books", "update_book", ":pk", ""],
+							"variable": [
+								{
+									"key": "pk",
+									"value": "1",
+									"description": "Book ID"
+								}
+							]
+						},
+						"description": "Update a book's information by ID.\n\n---\n\n**Authentication:** Required - Bearer Token\n\n---\n\n**Path Parameters:**\n\n- `pk`: Book ID\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X PATCH {{baseUrl}}/books/update_book/1/ \\\n  -H \"Authorization: Bearer {{access}}\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"title\": \"Updated Book Title\",\n    \"price\": 12.99\n  }'\n```\n\n---"
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\": \"Updated Book Title\",\n    \"price\": 12.99\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/books/update_book/1/",
+									"host": ["{{baseUrl}}"],
+									"path": ["books", "update_book", "1", ""]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"Book updated successfully\",\n    \"data\": {\n        \"id\": 1,\n        \"title\": \"Updated Book Title\",\n        \"char_name\": \"Tommy\",\n        \"price\": 12.99,\n        \"category\": \"Adventure\",\n        \"age\": \"5-7\",\n        \"gender\": \"unisex\",\n        \"rate\": 4.5,\n        \"description\": \"A fun adventure book\",\n        \"book_file\": \"{{baseUrl}}/books/bookfile/1/\",\n        \"cover_image\": \"{{baseUrl}}/books/cover/1/\",\n        \"book_file_type\": \"application/pdf\",\n        \"cover_image_type\": \"image/jpeg\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "DELETE /books/delete_book/{pk}/ - Delete Book",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/books/delete_book/1/",
+							"host": ["{{baseUrl}}"],
+							"path": ["books", "delete_book", ":pk", ""],
+							"variable": [
+								{
+									"key": "pk",
+									"value": "1",
+									"description": "Book ID"
+								}
+							]
+						},
+						"description": "Delete a book by ID.\n\n---\n\n**Authentication:** Required - Bearer Token\n\n---\n\n**Path Parameters:**\n\n- `pk`: Book ID\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X DELETE {{baseUrl}}/books/delete_book/1/ \\\n  -H \"Authorization: Bearer {{access}}\"\n```\n\n---"
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/books/delete_book/1/",
+									"host": ["{{baseUrl}}"],
+									"path": ["books", "delete_book", "1", ""]
+								}
+							},
+							"status": "No Content",
+							"code": 204,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"Deleted successfully\"\n}"
+						},
+						{
+							"name": "Not Found",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/books/delete_book/999/",
+									"host": ["{{baseUrl}}"],
+									"path": ["books", "delete_book", "999", ""]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"error\": \"Book not found\"\n}"
+						}
+					]
+				},
+				{
+					"name": "POST /books/search_books/ - Search Books",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Adventure\", //optional - search in title\n    \"category\": \"Fiction\", //optional - filter by category\n    \"age\": \"5-7\", //optional - filter by age range\n    \"gender\": \"unisex\" //optional - filter by gender\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/books/search_books/",
+							"host": ["{{baseUrl}}"],
+							"path": ["books", "search_books", ""]
+						},
+						"description": "Search for books based on criteria. All fields are optional.\n\n---\n\n**Authentication:** Required - Bearer Token\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X POST {{baseUrl}}/books/search_books/ \\\n  -H \"Authorization: Bearer {{access}}\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"title\": \"Adventure\",\n    \"category\": \"Fiction\",\n    \"age\": \"5-7\"\n  }'\n```\n\n---"
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\": \"Adventure\",\n    \"category\": \"Fiction\",\n    \"age\": \"5-7\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/books/search_books/",
+									"host": ["{{baseUrl}}"],
+									"path": ["books", "search_books", ""]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"id\": 1,\n        \"title\": \"Sample Book\",\n        \"char_name\": \"Tommy\",\n        \"price\": 10.99,\n        \"category\": \"Adventure\",\n        \"age\": \"5-7\",\n        \"gender\": \"unisex\",\n        \"rate\": 4.5,\n        \"description\": \"A fun adventure book\",\n        \"book_file\": \"{{baseUrl}}/books/bookfile/1/\",\n        \"cover_image\": \"{{baseUrl}}/books/cover/1/\",\n        \"book_file_type\": \"application/pdf\",\n        \"cover_image_type\": \"image/jpeg\"\n    }\n]"
+						},
+						{
+							"name": "No Books Found",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\": \"Nonexistent Book\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/books/search_books/",
+									"host": ["{{baseUrl}}"],
+									"path": ["books", "search_books", ""]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"No books found\"\n}"
+						}
+					]
+				},
+				{
+					"name": "GET /books/bookfile/{pk}/ - Get Book File",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/books/bookfile/1/",
+							"host": ["{{baseUrl}}"],
+							"path": ["books", "bookfile", ":pk", ""],
+							"variable": [
+								{
+									"key": "pk",
+									"value": "1",
+									"description": "Book ID"
+								}
+							]
+						},
+						"description": "Download the original book PDF file.\n\n---\n\n**Authentication:** Required - Bearer Token\n\n---\n\n**Path Parameters:**\n\n- `pk`: Book ID\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X GET {{baseUrl}}/books/bookfile/1/ \\\n  -H \"Authorization: Bearer {{access}}\" \\\n  -o book.pdf\n```\n\n---"
+					},
+					"response": [
+						{
+							"name": "Success Response - PDF File",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/books/bookfile/1/",
+									"host": ["{{baseUrl}}"],
+									"path": ["books", "bookfile", "1", ""]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/pdf"
+								},
+								{
+									"key": "Content-Disposition",
+									"value": "inline; filename=\"Sample_Book.pdf\""
+								}
+							],
+							"cookie": [],
+							"body": "<PDF_BINARY_DATA>"
+						}
+					]
+				},
+				{
+					"name": "GET /books/cover/{pk}/ - Get Book Cover",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/books/cover/1/",
+							"host": ["{{baseUrl}}"],
+							"path": ["books", "cover", ":pk", ""],
+							"variable": [
+								{
+									"key": "pk",
+									"value": "1",
+									"description": "Book ID"
+								}
+							]
+						},
+						"description": "Download the book cover image.\n\n---\n\n**Authentication:** Required - Bearer Token\n\n---\n\n**Path Parameters:**\n\n- `pk`: Book ID\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X GET {{baseUrl}}/books/cover/1/ \\\n  -H \"Authorization: Bearer {{access}}\" \\\n  -o cover.jpg\n```\n\n---"
+					},
+					"response": [
+						{
+							"name": "Success Response - Image File",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/books/cover/1/",
+									"host": ["{{baseUrl}}"],
+									"path": ["books", "cover", "1", ""]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "image/jpeg"
+								},
+								{
+									"key": "Content-Disposition",
+									"value": "inline; filename=\"Sample_Book_cover.jpg\""
+								}
+							],
+							"cookie": [],
+							"body": "<IMAGE_BINARY_DATA>"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Buying Management",
+			"description": "Endpoints for purchase requests, admin request management, and user library access.",
+			"item": [
+				{
+					"name": "POST /buy/purrequests/ - Create Purchase Request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"book_id\": 1, //optional - ID of book to purchase\n    \"customization_id\": 1 //optional - ID of customized book to purchase\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/buy/purrequests/",
+							"host": ["{{baseUrl}}"],
+							"path": ["buy", "purrequests", ""]
+						},
+						"description": "Create a purchase request for a book or customized book. Either `book_id` or `customization_id` must be provided.\n\n---\n\n**Authentication:** Required - Bearer Token (User only, not admin)\n\n---\n\n**Required Fields:**\n\n- Either `book_id` OR `customization_id` must be provided\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X POST {{baseUrl}}/buy/purrequests/ \\\n  -H \"Authorization: Bearer {{access}}\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"book_id\": 1\n  }'\n```\n\n---"
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"book_id\": 1\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/buy/purrequests/",
+									"host": ["{{baseUrl}}"],
+									"path": ["buy", "purrequests", ""]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Purchase request created.\",\n    \"request_id\": 1\n}"
+						},
+						{
+							"name": "Access Denied - Admin User",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_access}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"book_id\": 1\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/buy/purrequests/",
+									"host": ["{{baseUrl}}"],
+									"path": ["buy", "purrequests", ""]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"error\": \"Admins cannot create purchase requests.\"\n}"
+						},
+						{
+							"name": "Validation Error - Missing Book or Customization",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/buy/purrequests/",
+									"host": ["{{baseUrl}}"],
+									"path": ["buy", "purrequests", ""]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"error\": \"Either book_id or customization_id must be provided.\"\n}"
+						}
+					]
+				},
+				{
+					"name": "GET /buy/userlibrary/ - My Library",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/buy/userlibrary/",
+							"host": ["{{baseUrl}}"],
+							"path": ["buy", "userlibrary", ""]
+						},
+						"description": "Get the authenticated user's purchased books library.\n\n---\n\n**Authentication:** Required - Bearer Token (User only, not admin)\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X GET {{baseUrl}}/buy/userlibrary/ \\\n  -H \"Authorization: Bearer {{access}}\"\n```\n\n---"
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/buy/userlibrary/",
+									"host": ["{{baseUrl}}"],
+									"path": ["buy", "userlibrary", ""]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"id\": 1,\n        \"user\": 1,\n        \"book\": {\n            \"id\": 1,\n            \"title\": \"Sample Book\",\n            \"char_name\": \"Tommy\",\n            \"price\": 10.99,\n            \"category\": \"Adventure\",\n            \"age\": \"5-7\",\n            \"gender\": \"unisex\",\n            \"rate\": 4.5,\n            \"description\": \"A fun adventure book\",\n            \"book_file\": \"{{baseUrl}}/books/bookfile/1/\",\n            \"cover_image\": \"{{baseUrl}}/books/cover/1/\",\n            \"book_file_type\": \"application/pdf\",\n            \"cover_image_type\": \"image/jpeg\"\n        },\n        \"custom_book\": null,\n        \"added_at\": \"2024-01-15T10:30:00Z\"\n    },\n    {\n        \"id\": 2,\n        \"user\": 1,\n        \"book\": null,\n        \"custom_book\": {\n            \"id\": 1,\n            \"book\": {\n                \"id\": 1,\n                \"title\": \"Sample Book\",\n                \"char_name\": \"Tommy\"\n            },\n            \"child_name\": \"Alice\",\n            \"custom_book\": \"<binary_data>\"\n        },\n        \"added_at\": \"2024-01-15T11:00:00Z\"\n    }\n]"
+						},
+						{
+							"name": "Access Denied - Admin User",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_access}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/buy/userlibrary/",
+									"host": ["{{baseUrl}}"],
+									"path": ["buy", "userlibrary", ""]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"error\": \"Admins/staff cannot access this endpoint.\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Admin Endpoints",
+					"description": "Admin-only endpoints for managing purchase requests",
+					"item": [
+						{
+							"name": "GET /buy/admin/requests/ - Admin List Requests",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_access}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/buy/admin/requests/",
+									"host": ["{{baseUrl}}"],
+									"path": ["buy", "admin", "requests", ""]
+								},
+								"description": "List all purchase requests for admin processing.\n\n---\n\n**Authentication:** Required - Admin Bearer Token\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X GET {{baseUrl}}/buy/admin/requests/ \\\n  -H \"Authorization: Bearer {{admin_access}}\"\n```\n\n---"
+							},
+							"response": [
+								{
+									"name": "Success Response",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer {{admin_access}}"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/buy/admin/requests/",
+											"host": ["{{baseUrl}}"],
+											"path": ["buy", "admin", "requests", ""]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "[\n    {\n        \"id\": 1,\n        \"user\": 1,\n        \"book\": 1,\n        \"customization\": null,\n        \"status\": \"pending\",\n        \"created_at\": \"2024-01-15T10:30:00Z\"\n    },\n    {\n        \"id\": 2,\n        \"user\": 1,\n        \"book\": null,\n        \"customization\": 1,\n        \"status\": \"pending\",\n        \"created_at\": \"2024-01-15T11:00:00Z\"\n    }\n]"
+								}
+							]
+						},
+						{
+							"name": "POST /buy/admin/requests/{request_id}/process/ - Admin Process Request",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_access}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"action\": \"approve\" //req - either \"approve\" or \"reject\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/buy/admin/requests/1/process/",
+									"host": ["{{baseUrl}}"],
+									"path": ["buy", "admin", "requests", ":request_id", "process", ""],
+									"variable": [
+										{
+											"key": "request_id",
+											"value": "1",
+											"description": "Purchase request ID"
+										}
+									]
+								},
+								"description": "Approve or reject a purchase request. When approved, the book/customization is added to the user's library.\n\n---\n\n**Authentication:** Required - Admin Bearer Token\n\n---\n\n**Path Parameters:**\n\n- `request_id`: Purchase request ID\n\n---\n\n**Required Fields:**\n\n- `action`: Either \"approve\" or \"reject\"\n\n---\n\n**cURL Example:**\n\n```bash\ncurl -X POST {{baseUrl}}/buy/admin/requests/1/process/ \\\n  -H \"Authorization: Bearer {{admin_access}}\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"action\": \"approve\"\n  }'\n```\n\n---"
+							},
+							"response": [
+								{
+									"name": "Approve Success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer {{admin_access}}"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"action\": \"approve\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/buy/admin/requests/1/process/",
+											"host": ["{{baseUrl}}"],
+											"path": ["buy", "admin", "requests", "1", "process", ""]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"msg\": \"Approved and added to user library\"\n}"
+								},
+								{
+									"name": "Reject Success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer {{admin_access}}"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"action\": \"reject\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/buy/admin/requests/1/process/",
+											"host": ["{{baseUrl}}"],
+											"path": ["buy", "admin", "requests", "1", "process", ""]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"msg\": \"Request rejected\"\n}"
+								},
+								{
+									"name": "Invalid Action",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer {{admin_access}}"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"action\": \"invalid\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/buy/admin/requests/1/process/",
+											"host": ["{{baseUrl}}"],
+											"path": ["buy", "admin", "requests", "1", "process", ""]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"error\": \"Invalid action\"\n}"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}
+
