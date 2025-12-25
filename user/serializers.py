@@ -297,6 +297,8 @@ class UserSerializer(serializers.ModelSerializer):
             "is_admin",
             "email",
             "password",
+            "address",
+            "phone",
         ]
 
         # password myzhr4
@@ -318,7 +320,7 @@ class UserSerializer(serializers.ModelSerializer):
 class ListSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "email", "first_name", "last_name", "image", "is_admin"]
+        fields = ["id", "email", "first_name", "last_name", "image", "is_admin", "address","phone",]
 
 
 class AdminCreateSerializer(serializers.ModelSerializer):
