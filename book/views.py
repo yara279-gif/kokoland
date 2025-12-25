@@ -865,34 +865,6 @@ class CustomizeBook(APIView):
 
 # ==================== LIST CUSTOMIZATIONS ENDPOINT ====================
 
-@api_view(["GET"])
-@permission_classes([IsAuthenticated])
-def listCustomizedBooks(request):
-    """
-    List all customized books for the authenticated user
-    GET /books/customizations/
-    """
-    try:
-        # Filter by user
-        customized_books = Customizations.objects.select_related(
-            'book', 'user_id'
-        ).filter(user_id=request.user).order_by('-created_at')
-        
-        serializer = CustomizationSerializer(
-            customized_books, many=True, context={"request": request}
-        )
-        
-        return Response({
-            "success": True,
-            "count": customized_books.count(),
-            "customizations": serializer.data
-        }, status=status.HTTP_200_OK)
-        
-    except Exception as e:
-        return Response({
-            "success": False,
-            "error": str(e)
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # ==================== GET SINGLE CUSTOMIZATION ENDPOINT ====================
@@ -1143,24 +1115,7 @@ class BookCoverView(APIView):
             print(f"  ❌ Error processing image {image_key}: {str(e)}")
             return None
 
-@api_view(["GET"])
-@permission_classes([IsAuthenticated])
-def listCustomizedBooks(request):
-    """List all customized books with optimized query"""
-    if request.method == "GET":
-        customized_books = Customizations.objects.select_related(
-            'book', 'user_id'
-        ).all()
-        
-        serializer = CustomizationSerializer(
-            customized_books, many=True, context={"request": request}
-        )
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    
-    return Response(
-        {"msg": "Method not allowed"}, 
-        status=status.HTTP_405_METHOD_NOT_ALLOWED
-    )
+
 
 
 @api_view(["POST"])
@@ -1379,9 +1334,7 @@ def search_about_book(request):
 def listCustomizedBooks(request):
     """List all customized books with optimized query"""
     if request.method == "GET":
-        customized_books = Customizations.objects.select_related(
-            'book', 'user_id'
-        ).all()
+        customized_books = Customizations.objects.all()
         
         serializer = CustomizationSerializer(
             customized_books, many=True, context={"request": request}

@@ -6,7 +6,7 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 # Create your models here.
 class UserManager(BaseUserManager):
     def create_user(
-        self, email,  first_name, last_name, password=None, password2=None,address='', payment_info=''
+        self, email,  first_name, last_name, password=None, password2=None,address='', phone=''
     ):
         """
         Creates and saves a User with the given email, date of
@@ -20,7 +20,8 @@ class UserManager(BaseUserManager):
             email=self.normalize_email(email),
             first_name=first_name,
             last_name=last_name,
-
+            address=address,   # <-- assign here
+            phone=phone,  
         )
 
         user.set_password(password)
@@ -40,7 +41,7 @@ class UserManager(BaseUserManager):
             first_name=first_name,
             last_name=last_name,
             address='',
-            payment_info='',
+            phone='',
     
 
         )
@@ -63,7 +64,9 @@ class User(AbstractBaseUser):
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False, null=True, blank=True)
     address = models.CharField(max_length=500, default='',null=True, blank=True)
-    payment_info = models.CharField(max_length=500, default='',null=True, blank=True)
+    # payment_info = models.CharField(max_length=500, default='',null=True, blank=True)
+    phone = models.CharField(max_length=20, default='',null=True, blank=True)
+
 
     objects = UserManager()
     USERNAME_FIELD = "email"

@@ -108,9 +108,9 @@ def login(request):
 
 
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def userprofile(request):
     if request.method == "GET":
-        permission_classes = [IsAuthOrReadOnly]
         serializer = serializers.userProfileSerializer(
             request.user, context={"request": request}
         )

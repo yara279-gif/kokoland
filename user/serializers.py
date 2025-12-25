@@ -30,7 +30,6 @@ class userRegisterSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "address",
-            "payment_info",
             "password",
             "password2",
 
@@ -73,10 +72,9 @@ class userProfileSerializer(serializers.ModelSerializer):
             "is_admin",
             "first_name",
             "last_name",
-            "image",
             "address",
-            "payment_info",
-
+            "phone",
+            "image",
         ]
 
 
@@ -84,7 +82,7 @@ class userProfileSerializer(serializers.ModelSerializer):
 class updateuserprofileserializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["email",  "first_name", "last_name", "image", "address", "payment_info"]
+        fields = ["email",  "first_name", "last_name", "image", "address", "phone"]
 
 
 # ---------------------------------(change-password)-------------------------------------
@@ -122,20 +120,6 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
         return User.objects.create_user(**validated_data)
 
 
-# ---------------------------------(user-profile)-------------------------------------
-
-
-class userProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = [
-            "id",
-            "email",
-            "is_admin",
-            "first_name",
-            "last_name",
-            "image",
-        ]
 
 
 # ---------------------------------(change-password)-------------------------------------
@@ -282,7 +266,7 @@ class AdminSerializer(serializers.ModelSerializer):
             "is_admin",
             "email",
             "address",
-            "payment_info",
+            "phone",
             "password",
         ]
 
